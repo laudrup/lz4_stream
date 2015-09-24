@@ -1,5 +1,5 @@
 #include <streambuf>
-#include <ostream>
+#include <iostream>
 #include <vector>
 #include <memory>
 
@@ -39,4 +39,35 @@ class LZ4OutputStream : public std::ostream
   };
 
   std::unique_ptr<LZ4OuputBuffer> buffer_;
+};
+
+class LZ4InputStream : public std::istream
+{
+ public:
+  LZ4InputStream(std::istream& source)
+    : buffer_(std::make_unique<LZ4InputBuffer>(source))
+  {
+    rdbuf(buffer_.get());
+  }
+
+ private:
+  class LZ4InputBuffer : public std::streambuf
+  {
+  public:
+    LZ4InputBuffer(std::istream &source);
+    ~LZ4InputBuffer();
+    int_type underflow() override;
+
+    LZ4InputBuffer(const LZ4InputBuffer &) = delete;
+    LZ4InputBuffer& operator= (const LZ4InputBuffer &) = delete;
+  private:
+    std::istream& source_;
+    std::vector<char> src_buf_;
+    std::vector<char> dest_buf_;
+    size_t offset_;
+    size_t src_buf_size_;
+    LZ4F_decompressionContext_t ctx_;
+  };
+
+  std::unique_ptr<LZ4InputBuffer> buffer_;
 };

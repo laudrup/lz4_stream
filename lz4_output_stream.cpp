@@ -13,7 +13,7 @@ LZ4OutputStream::LZ4OuputBuffer::LZ4OuputBuffer(std::ostream &sink)
   size_t ret = LZ4F_createCompressionContext(&ctx_, LZ4F_VERSION);
   if (LZ4F_isError(ret))
   {
-    throw std::runtime_error(std::string("Failed to create LZ4 context: ")
+    throw std::runtime_error(std::string("Failed to create LZ4 compression context: ")
                              + LZ4F_getErrorName(ret));
   }
   writeHeader();
