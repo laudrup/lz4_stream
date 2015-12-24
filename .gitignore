@@ -1,0 +1,6 @@
+.sconsign.dblite
+*.a
+*.o
+lz4_compress
+lz4_decompress
+lz4_stream_test
