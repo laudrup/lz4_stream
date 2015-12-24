@@ -1,3 +1,6 @@
+#ifndef LZ4_STREAM
+#define LZ4_STREAM
+
 // LZ4 Headers
 #include <lz4frame.h>
 
@@ -117,3 +120,5 @@ class LZ4InputStream : public std::istream
 
   std::unique_ptr<LZ4InputBuffer> buffer_;
 };
+
+#endif // LZ4_STREAM
