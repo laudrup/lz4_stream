@@ -1,5 +1,7 @@
+// Own headers
 #include "lz4_stream.h"
 
+// Standard headers
 #include <iostream>
 #include <fstream>
 #include <algorithm>

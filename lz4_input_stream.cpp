@@ -1,3 +1,4 @@
+// Own headers
 #include "lz4_stream.h"
 
 LZ4InputStream::LZ4InputBuffer::LZ4InputBuffer(std::istream &source)
