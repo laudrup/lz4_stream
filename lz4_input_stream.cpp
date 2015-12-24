@@ -3,8 +3,8 @@
 
 LZ4InputStream::LZ4InputBuffer::LZ4InputBuffer(std::istream &source)
   : source_(source),
-    src_buf_(64 * 1024),
-    dest_buf_(64 * 1024),
+    src_buf_(),
+    dest_buf_(),
     offset_(0),
     src_buf_size_(0)
 {
