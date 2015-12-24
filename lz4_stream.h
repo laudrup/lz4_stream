@@ -55,6 +55,7 @@ class LZ4OutputStream : public std::ostream
 
     LZ4OuputBuffer(const LZ4OuputBuffer &) = delete;
     LZ4OuputBuffer& operator= (const LZ4OuputBuffer &) = delete;
+    void close();
 
   private:
     int_type overflow(int_type ch) override;
@@ -68,6 +69,7 @@ class LZ4OutputStream : public std::ostream
     std::array<char, 256> src_buf_;
     std::vector<char> dest_buf_;
     LZ4F_compressionContext_t ctx_;
+    bool closed_;
   };
 
   std::unique_ptr<LZ4OuputBuffer> buffer_;

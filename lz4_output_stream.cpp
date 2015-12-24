@@ -7,7 +7,8 @@
 
 LZ4OutputStream::LZ4OuputBuffer::LZ4OuputBuffer(std::ostream &sink)
   : sink_(sink),
-    dest_buf_(LZ4F_compressBound(src_buf_.size(), NULL))
+    dest_buf_(LZ4F_compressBound(src_buf_.size(), NULL)),
+    closed_(false)
 {
   char* base = &src_buf_.front();
   setp(base, base + src_buf_.size() - 1);
@@ -23,9 +24,7 @@ LZ4OutputStream::LZ4OuputBuffer::LZ4OuputBuffer(std::ostream &sink)
 
 LZ4OutputStream::LZ4OuputBuffer::~LZ4OuputBuffer()
 {
-  sync();
-  writeFooter();
-  LZ4F_freeCompressionContext(ctx_);
+  close();
 }
 
 LZ4OutputStream::int_type LZ4OutputStream::LZ4OuputBuffer::overflow(int_type ch)
@@ -48,6 +47,7 @@ LZ4OutputStream::int_type LZ4OutputStream::LZ4OuputBuffer::sync()
 
 void LZ4OutputStream::LZ4OuputBuffer::compressAndWrite()
 {
+  assert(!closed_);
   std::ptrdiff_t orig_size = pptr() - pbase();
   pbump(-orig_size);
   size_t comp_size = LZ4F_compressUpdate(ctx_, &dest_buf_.front(), dest_buf_.size(),
@@ -57,6 +57,7 @@ void LZ4OutputStream::LZ4OuputBuffer::compressAndWrite()
 
 void LZ4OutputStream::LZ4OuputBuffer::writeHeader()
 {
+  assert(!closed_);
   size_t ret = LZ4F_compressBegin(ctx_, &dest_buf_.front(), dest_buf_.size(), NULL);
   if (LZ4F_isError(ret))
   {
@@ -68,6 +69,7 @@ void LZ4OutputStream::LZ4OuputBuffer::writeHeader()
 
 void LZ4OutputStream::LZ4OuputBuffer::writeFooter()
 {
+  assert(!closed_);
   size_t ret = LZ4F_compressEnd(ctx_, &dest_buf_.front(), dest_buf_.size(), NULL);
   if (LZ4F_isError(ret))
   {
@@ -75,4 +77,16 @@ void LZ4OutputStream::LZ4OuputBuffer::writeFooter()
                              + LZ4F_getErrorName(ret));
   }
   sink_.write(&dest_buf_.front(), ret);
+}
+
+void LZ4OutputStream::LZ4OuputBuffer::close()
+{
+  if (closed_)
+  {
+    return;
+  }
+  sync();
+  writeFooter();
+  LZ4F_freeCompressionContext(ctx_);
+  closed_ = true;
 }
