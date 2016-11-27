@@ -58,6 +58,4 @@ install:
 script:
   - cd $TRAVIS_BUILD_DIR
   - scons
-
-after_script:
   - ./lz4_stream_test
