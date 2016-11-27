@@ -1,65 +1,14 @@
-# Use new trusty images, should yield newer compilers and packages
-# Taken from https://github.com/genbattle/dkm
 sudo: required
-dist: trusty
-language: cpp
 
-matrix:
-  include:
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-4.9
-      env: COMPILER=g++-4.9
-    - compiler: gcc
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-      env: COMPILER=g++-5
-    - compiler: clang
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.6
-          packages:
-            - clang-3.6
-      env: COMPILER=clang++-3.6
-    - compiler: clang
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-3.7
-          packages:
-            - clang-3.7
-      env: COMPILER=clang++-3.7
+language: c++
+
+services:
+  - docker
 
 before_install:
-  - sudo apt-get update -qq
-
-install:
-  # Build google-test libs from the sources provided by libgtest-dev
-  - sudo apt-get install -y scons libgtest-dev
-  - cd /usr/src/gtest
-  - sudo cmake .
-  - sudo make
-  - sudo mv libg* /usr/lib/
-  # Build lz4 library from the latest sources
-  - cd /tmp
-  - git clone https://github.com/lz4/lz4.git
-  - cd lz4
-  - sudo make
-  - sudo PREFIX=/usr make install
-  - sudo ldconfig
+- docker build -t ubuntu/gcc-5
 
 script:
-  - cd $TRAVIS_BUILD_DIR
-  - scons
-  - ldd ./lz4_stream_test
+- >
+  docker run -t -v $TRAVIS_BUILD_DIR:/lz4_stream ubuntu/gcc-5
+  /bin/bash -c "cd /lz4_stream && scons && ./lz4_stream_test"
