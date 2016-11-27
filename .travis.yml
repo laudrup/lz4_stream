@@ -1,0 +1,14 @@
+language: cpp
+
+compiler:
+  - clang
+  - gcc
+
+install: 
+  - sudo apt-get install -y g++ clang++ scons
+
+script:
+  - scons
+
+after_script:
+  - lz4_stream_test
