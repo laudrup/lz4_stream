@@ -23,6 +23,10 @@ A SConstruct file is provided for building the code requiring [SCons] to be inst
 
 To build and run the tests, [Google Test Framework] should be installed.
 
+Build status
+------------
+[![Build Status](https://travis-ci.org/laudrup/lz4_stream.png)](https://travis-ci.org/laudrup/lz4_stream)
+
 License
 -------
 
