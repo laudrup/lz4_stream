@@ -45,7 +45,7 @@ before_install:
   - sudo apt-get update -qq
 
 install:
-  - sudo apt-get install -y scons
+  - sudo apt-get install -y scons liblz4-dev
 
 script:
   - scons
