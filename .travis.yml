@@ -54,9 +54,9 @@ install:
   - git clone https://github.com/lz4/lz4.git
   - make -C lz4
   - sudo PREFIX=/usr make -C lz4 install
-  - cd
 
 script:
+  - cd $TRAVIS_BUILD_DIR
   - scons
 
 after_script:
