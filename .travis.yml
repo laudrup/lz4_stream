@@ -1,10 +1,10 @@
 sudo: required
 
-language: c++
+language: cpp
 
-env:
-  - CXX=g++
-  - CXX=clang++
+compiler:
+  - gcc
+  - clang
 
 services:
   - docker
