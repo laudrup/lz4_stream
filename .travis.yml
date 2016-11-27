@@ -46,9 +46,15 @@ before_install:
 
 install:
   - sudo apt-get install -y scons libgtest-dev
+  - cd /usr/src/gtest
+  - sudo cmake .
+  - sudo make
+  - sudo mv libg* /usr/lib/
+  - cd /tmp
   - git clone https://github.com/lz4/lz4.git
   - make -C lz4
   - sudo PREFIX=/usr make -C lz4 install
+  - cd
 
 script:
   - scons
