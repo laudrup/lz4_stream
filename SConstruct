@@ -1,4 +1,9 @@
-env = Environment(CXXFLAGS="-std=c++14")
+import os
+
+# Support for travis-ci custom compiler
+COMPILER = os.environ.get("COMPILER", "g++")
+
+env = Environment(CXXFLAGS="-std=c++14", CXX=COMPILER)
 
 env.Library(target="lz4_stream", source=["lz4_input_stream.cpp",
                                          "lz4_output_stream.cpp"])
