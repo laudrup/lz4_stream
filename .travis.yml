@@ -2,6 +2,10 @@ sudo: required
 
 language: c++
 
+env:
+  - CXX=g++
+  - CXX=clang++
+
 services:
   - docker
 
@@ -10,5 +14,5 @@ before_install:
 
 script:
 - >
-  docker run -t -v $TRAVIS_BUILD_DIR:/lz4_stream ubuntu/gcc-5
+  docker run -t -e CXX=$CXX -v $TRAVIS_BUILD_DIR:/lz4_stream ubuntu/gcc-5
   /bin/bash -c "cd /lz4_stream && scons && ./lz4_stream_test"
