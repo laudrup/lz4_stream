@@ -54,8 +54,9 @@ install:
   # Build lz4 library from the latest sources
   - cd /tmp
   - git clone https://github.com/lz4/lz4.git
-  - make -C lz4
-  - sudo PREFIX=/usr make -C lz4 install
+  - cd lz4
+  - sudo make
+  - sudo PREFIX=/usr make install
   - sudo ldconfig
 
 script:
