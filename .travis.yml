@@ -60,4 +60,4 @@ script:
   - scons
 
 after_script:
-  - lz4_stream_test
+  - ./lz4_stream_test
