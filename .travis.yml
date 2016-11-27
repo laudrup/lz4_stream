@@ -45,7 +45,8 @@ before_install:
   - sudo apt-get update -qq
 
 install:
-  - sudo apt-get install -y scons liblz4-dev
+  - sudo apt-get install -y scons
+  - cd /tmp && git clone https://github.com/lz4/lz4.git && cd lz4 && make && sudo PREFIX=/usr make install
 
 script:
   - scons
