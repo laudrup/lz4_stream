@@ -7,26 +7,26 @@ if "CPPPATH" in os.environ:
     CPPPATH = [os.getenv("CPPPATH")]
 
 LIBPATH = ["."]
-if "LIBPATH" in os.environ:
-    LIBPATH += [os.getenv("LIBPATH")]
+
+LIBRARY_SOURCES = ["lz4_input_stream.cpp", "lz4_output_stream.cpp"]
+STATIC_LIB = "lz4_stream"
 
 if CXX in ["g++", "clang++"]:
     CXXFLAGS = ["-std=c++14", "-Wall", "-Wextra", "-Werror"]
-    LIBS = [File("liblz4_stream.a"), "lz4"]
+    LIBS = [File("lib%s.a" % STATIC_LIB), "lz4"]
 elif CXX in ["cl", "cl.exe"]:
+    STATIC_LIB += "_static"
     CXXFLAGS = ["-W4", "-EHsc"]
-    LIBS = [File("lz4_stream.lib"), File("liblz4_static.lib")]
+    LIBS = [File("%s.lib" % STATIC_LIB), File("liblz4.lib")]
+    LIBRARY_SOURCES += ["liblz4.lib"]
 else:
     CXXFLAGS = []
 
-LIBRARY_SOURCES = ["lz4_input_stream.cpp", "lz4_output_stream.cpp"]
-
 env = Environment(CXXFLAGS=CXXFLAGS, CXX=CXX, CPPPATH=CPPPATH)
 
-env.Library(target="lz4_stream", source=LIBRARY_SOURCES)
+env.StaticLibrary(target=STATIC_LIB, source=LIBRARY_SOURCES)
 
-env.SharedLibrary(target="lz4_stream", source=["lz4_input_stream.cpp",
-                                               "lz4_output_stream.cpp"])
+env.SharedLibrary(target="lz4_stream", source=LIBRARY_SOURCES)
 
 env.Program(target="lz4_compress", source=["lz4_compress.cpp"],
             LIBS=LIBS, LIBPATH=LIBPATH)

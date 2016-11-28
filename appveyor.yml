@@ -13,6 +13,7 @@ install:
   - cd lz4
   - 7z x ../lz4.zip
   - cd ..
+  - cp lz4/dll/liblz4.{dll,lib} .
 
 build_script:
   - scons
