@@ -1,12 +1,14 @@
 environment:
   CXX: cl
+  CPPPATH: lz4/include
   matrix:
     - PYTHON: "C:\\Python27"
 
 install:
   - SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - easy_install scons
-  - nuget install lz4
+  - curl -L -p lz4.zip https://github.com/lz4/lz4/releases/download/v1.7.4.2/lz4_v1_7_4_win32.zip
+  - 7z e lz4.zip
 
 build_script:
   - scons

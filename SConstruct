@@ -1,14 +1,19 @@
 import os
 
 CXX = os.getenv("CXX", "g++")
+
 CXXFLAGS = ["-Wall"]
 if CXX in ["g++", "clang++"]:
     CXXFLAGS += ["-std=c++14", "-Wextra", "-Werror"]
 
+CPPPATH = []
+if "CPPPATH" in os.environment:
+    CPPPATH = [os.getenv("CPPPATH")]
+
 LIBRARY_SOURCES = ["lz4_input_stream.cpp", "lz4_output_stream.cpp"]
 LIBS = [File("liblz4_stream.a"), "lz4"]
 
-env = Environment(CXXFLAGS=CXXFLAGS, CXX=CXX)
+env = Environment(CXXFLAGS=CXXFLAGS, CXX=CXX, CPPPATH=CPPPATH)
 
 env.Library(target="lz4_stream", source=LIBRARY_SOURCES)
 
