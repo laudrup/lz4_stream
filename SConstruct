@@ -16,13 +16,13 @@ if CXX in ["g++", "clang++"]:
     LIBS = [File("lib%s.a" % STATIC_LIB), "lz4"]
 elif CXX in ["cl", "cl.exe"]:
     STATIC_LIB += "_static"
-    CXXFLAGS = ["-W4", "-EHsc", "-MTd", "-MACHINE:X86"]
+    CXXFLAGS = ["-W4", "-EHsc", "-MTd"]
     LIBS = [File("%s.lib" % STATIC_LIB), File("liblz4.lib")]
     LIBRARY_SOURCES += ["liblz4.lib"]
 else:
     CXXFLAGS = []
 
-env = Environment(CXXFLAGS=CXXFLAGS, CXX=CXX, CPPPATH=CPPPATH)
+env = Environment(CXXFLAGS=CXXFLAGS, CXX=CXX, CPPPATH=CPPPATH, TARGET_ARCH="x86")
 
 env.StaticLibrary(target=STATIC_LIB, source=LIBRARY_SOURCES)
 
