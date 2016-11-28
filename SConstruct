@@ -7,7 +7,7 @@ if CXX in ["g++", "clang++"]:
     CXXFLAGS += ["-std=c++14", "-Wextra", "-Werror"]
 
 CPPPATH = []
-if "CPPPATH" in os.environment:
+if "CPPPATH" in os.environ:
     CPPPATH = [os.getenv("CPPPATH")]
 
 LIBRARY_SOURCES = ["lz4_input_stream.cpp", "lz4_output_stream.cpp"]
