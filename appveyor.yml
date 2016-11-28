@@ -1,4 +1,5 @@
 environment:
+  CXX: cl
   matrix:
     - PYTHON: "C:\\Python27"
 
@@ -7,7 +8,7 @@ install:
   - easy_install scons
 
 build_script:
-  - CXX=cl scons
+  - scons
 
 test_script:
   - lz4_stream_test
