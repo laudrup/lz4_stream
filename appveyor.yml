@@ -6,6 +6,7 @@ environment:
 install:
   - SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - easy_install scons
+  - nuget install lz4
 
 build_script:
   - scons
