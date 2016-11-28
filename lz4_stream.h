@@ -5,6 +5,7 @@
 #include <lz4frame.h>
 
 // Standard headers
+#include <cassert>
 #include <streambuf>
 #include <iostream>
 #include <vector>
@@ -27,9 +28,10 @@ class LZ4OutputStream : public std::ostream
    * @param sink The stream to write compressed data to
    */
   LZ4OutputStream(std::ostream& sink)
-    : buffer_(std::make_unique<LZ4OutputBuffer>(sink))
+    : std::ostream(new LZ4OutputBuffer(sink)),
+      buffer_(dynamic_cast<LZ4OutputBuffer*>(rdbuf()))
   {
-    rdbuf(buffer_.get());
+    assert(buffer_);
   }
 
   /**
@@ -38,6 +40,7 @@ class LZ4OutputStream : public std::ostream
   ~LZ4OutputStream()
   {
     close();
+    delete buffer_;
   }
 
   /**
@@ -76,7 +79,7 @@ class LZ4OutputStream : public std::ostream
     bool closed_;
   };
 
-  std::unique_ptr<LZ4OutputBuffer> buffer_;
+  LZ4OutputBuffer* buffer_;
 };
 
 /**
@@ -95,9 +98,18 @@ class LZ4InputStream : public std::istream
    * @param source The stream to read LZ4 compressed data from
    */
   LZ4InputStream(std::istream& source)
-    : buffer_(std::make_unique<LZ4InputBuffer>(source))
+    : std::istream(new LZ4InputBuffer(source)),
+      buffer_(dynamic_cast<LZ4InputBuffer*>(rdbuf()))
   {
-    rdbuf(buffer_.get());
+    assert(buffer_);
+  }
+
+  /**
+   * @brief Destroys the LZ4 output stream.
+   */
+  ~LZ4InputStream()
+  {
+    delete buffer_;
   }
 
  private:
@@ -119,7 +131,7 @@ class LZ4InputStream : public std::istream
     LZ4F_decompressionContext_t ctx_;
   };
 
-  std::unique_ptr<LZ4InputBuffer> buffer_;
+  LZ4InputBuffer* buffer_;
 };
 
 #endif // LZ4_STREAM
