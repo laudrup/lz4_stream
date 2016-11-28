@@ -1,6 +1,7 @@
 environment:
   CXX: cl
   CPPPATH: lz4/include
+  LIBPATH: lz4/static
   matrix:
     - PYTHON: "C:\\Python27"
 
