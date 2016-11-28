@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <array>
 
 /**
  * @brief An output stream that will LZ4 compress the input data.
