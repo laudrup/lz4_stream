@@ -7,7 +7,7 @@ install:
   - easy_install scons
 
 build_script:
-  - scons
+  - CXX=cl scons
 
 test_script:
   - lz4_stream_test
