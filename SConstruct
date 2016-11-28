@@ -16,7 +16,7 @@ if CXX in ["g++", "clang++"]:
     LIBS = [File("lib%s.a" % STATIC_LIB), "lz4"]
 elif CXX in ["cl", "cl.exe"]:
     STATIC_LIB += "_static"
-    CXXFLAGS = ["-W4", "-EHsc"]
+    CXXFLAGS = ["-W4", "-EHsc", "-MTd"]
     LIBS = [File("%s.lib" % STATIC_LIB), File("liblz4.lib")]
     LIBRARY_SOURCES += ["liblz4.lib"]
 else:
