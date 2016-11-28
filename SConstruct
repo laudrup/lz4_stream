@@ -15,7 +15,7 @@ if CXX in ["g++", "clang++"]:
     LIBS = [File("liblz4_stream.a"), "lz4"]
 elif CXX in ["cl", "cl.exe"]:
     CXXFLAGS = ["-W4", "-EHsc"]
-    LIBS = [File("liblz4_stream.lib"), File("liblz4_static.lib")]
+    LIBS = [File("lz4_stream.lib"), File("liblz4_static.lib")]
 else:
     CXXFLAGS = []
 
