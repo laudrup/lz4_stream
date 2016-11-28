@@ -4,6 +4,7 @@
 // Standard headers
 #include <cassert>
 #include <exception>
+#include <functional>
 
 LZ4OutputStream::LZ4OutputBuffer::LZ4OutputBuffer(std::ostream &sink)
   : sink_(sink),
