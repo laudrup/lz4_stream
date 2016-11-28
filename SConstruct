@@ -1,9 +1,9 @@
 import os
 
 CXX = os.getenv("CXX", "g++")
-CXXFLAGS = ["-std=c++14", "-Wall"]
+CXXFLAGS = ["-Wall"]
 if CXX in ["g++", "clang++"]:
-    CXXFLAGS += ["-Wextra", "-Werror"]
+    CXXFLAGS += ["-std=c++14", "-Wextra", "-Werror"]
 
 LIBRARY_SOURCES = ["lz4_input_stream.cpp", "lz4_output_stream.cpp"]
 LIBS = [File("liblz4_stream.a"), "lz4"]
