@@ -22,13 +22,10 @@ namespace
 
   std::string random_string(size_t size)
   {
-    using random_chars_engine = std::independent_bits_engine<
-      std::default_random_engine, CHAR_BIT, unsigned char>;
-
-    random_chars_engine rbe;
+    std::random_device rd;
     std::string str;
     str.reserve(size);
-    std::generate_n(std::back_inserter(str), size, std::ref(rbe));
+    std::generate_n(std::back_inserter(str), size, std::ref(rd));
 
     return str;
   }
