@@ -1,0 +1,17 @@
+environment:
+
+  matrix:
+    - PYTHON: "C:\\Python27"
+
+install:
+
+  - SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - pip install -r requirements.txt
+  - easy_install scons
+
+build:
+  - scons
+
+test_script:
+  - lz4_stream_test
+
