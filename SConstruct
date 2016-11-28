@@ -5,6 +5,8 @@ CXX = os.getenv("CXX", "g++")
 CXXFLAGS = ["-Wall"]
 if CXX in ["g++", "clang++"]:
     CXXFLAGS += ["-std=c++14", "-Wextra", "-Werror"]
+if CXX in ["cl", "cl.exe"]:
+    CXXFLAGS += ["-EHsc"]
 
 CPPPATH = []
 if "CPPPATH" in os.environ:
