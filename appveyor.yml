@@ -8,7 +8,10 @@ install:
   - SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
   - easy_install scons
   - curl -L -o lz4.zip https://github.com/lz4/lz4/releases/download/v1.7.4.2/lz4_v1_7_4_win32.zip
-  - 7z e lz4.zip
+  - mkdir lz4
+  - cd lz4
+  - 7z x ../lz4.zip
+  - cd ..
 
 build_script:
   - scons
