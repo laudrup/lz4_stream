@@ -1,8 +1,9 @@
 import os
 
 CXX = os.getenv("CXX", "g++")
+CXXFLAGS = ["-std=c++14", "-Wall", "-Wextra", "-Werror"]
 
-env = Environment(CXXFLAGS="-std=c++14", CXX=CXX)
+env = Environment(CXXFLAGS=CXXFLAGS, CXX=CXX)
 
 env.Library(target="lz4_stream", source=["lz4_input_stream.cpp",
                                          "lz4_output_stream.cpp"])
