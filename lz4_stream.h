@@ -27,7 +27,7 @@ class LZ4OutputStream : public std::ostream
    * @param sink The stream to write compressed data to
    */
   LZ4OutputStream(std::ostream& sink)
-    : buffer_(std::make_unique<LZ4OuputBuffer>(sink))
+    : buffer_(std::make_unique<LZ4OutputBuffer>(sink))
   {
     rdbuf(buffer_.get());
   }
@@ -51,14 +51,14 @@ class LZ4OutputStream : public std::ostream
   }
 
  private:
-  class LZ4OuputBuffer : public std::streambuf
+  class LZ4OutputBuffer : public std::streambuf
   {
   public:
-    LZ4OuputBuffer(std::ostream &sink);
-    ~LZ4OuputBuffer();
+    LZ4OutputBuffer(std::ostream &sink);
+    ~LZ4OutputBuffer();
 
-    LZ4OuputBuffer(const LZ4OuputBuffer &) = delete;
-    LZ4OuputBuffer& operator= (const LZ4OuputBuffer &) = delete;
+    LZ4OutputBuffer(const LZ4OutputBuffer &) = delete;
+    LZ4OutputBuffer& operator= (const LZ4OutputBuffer &) = delete;
     void close();
 
   private:
@@ -76,7 +76,7 @@ class LZ4OutputStream : public std::ostream
     bool closed_;
   };
 
-  std::unique_ptr<LZ4OuputBuffer> buffer_;
+  std::unique_ptr<LZ4OutputBuffer> buffer_;
 };
 
 /**

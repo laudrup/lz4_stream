@@ -5,8 +5,9 @@
 #include <cassert>
 #include <exception>
 
-LZ4OutputStream::LZ4OuputBuffer::LZ4OuputBuffer(std::ostream &sink)
+LZ4OutputStream::LZ4OutputBuffer::LZ4OutputBuffer(std::ostream &sink)
   : sink_(sink),
+    // TODO: No need to recalculate the dest_buf_ size on each construction
     dest_buf_(LZ4F_compressBound(src_buf_.size(), NULL)),
     closed_(false)
 {
@@ -22,12 +23,12 @@ LZ4OutputStream::LZ4OuputBuffer::LZ4OuputBuffer(std::ostream &sink)
   writeHeader();
 }
 
-LZ4OutputStream::LZ4OuputBuffer::~LZ4OuputBuffer()
+LZ4OutputStream::LZ4OutputBuffer::~LZ4OutputBuffer()
 {
   close();
 }
 
-LZ4OutputStream::int_type LZ4OutputStream::LZ4OuputBuffer::overflow(int_type ch)
+LZ4OutputStream::int_type LZ4OutputStream::LZ4OutputBuffer::overflow(int_type ch)
 {
   assert(std::less_equal<char*>()(pptr(), epptr()));
 
@@ -39,13 +40,13 @@ LZ4OutputStream::int_type LZ4OutputStream::LZ4OuputBuffer::overflow(int_type ch)
   return ch;
 }
 
-LZ4OutputStream::int_type LZ4OutputStream::LZ4OuputBuffer::sync()
+LZ4OutputStream::int_type LZ4OutputStream::LZ4OutputBuffer::sync()
 {
   compressAndWrite();
   return 0;
 }
 
-void LZ4OutputStream::LZ4OuputBuffer::compressAndWrite()
+void LZ4OutputStream::LZ4OutputBuffer::compressAndWrite()
 {
   assert(!closed_);
   std::ptrdiff_t orig_size = pptr() - pbase();
@@ -55,7 +56,7 @@ void LZ4OutputStream::LZ4OuputBuffer::compressAndWrite()
   sink_.write(&dest_buf_.front(), comp_size);
 }
 
-void LZ4OutputStream::LZ4OuputBuffer::writeHeader()
+void LZ4OutputStream::LZ4OutputBuffer::writeHeader()
 {
   assert(!closed_);
   size_t ret = LZ4F_compressBegin(ctx_, &dest_buf_.front(), dest_buf_.size(), NULL);
@@ -67,7 +68,7 @@ void LZ4OutputStream::LZ4OuputBuffer::writeHeader()
   sink_.write(&dest_buf_.front(), ret);
 }
 
-void LZ4OutputStream::LZ4OuputBuffer::writeFooter()
+void LZ4OutputStream::LZ4OutputBuffer::writeFooter()
 {
   assert(!closed_);
   size_t ret = LZ4F_compressEnd(ctx_, &dest_buf_.front(), dest_buf_.size(), NULL);
@@ -79,7 +80,7 @@ void LZ4OutputStream::LZ4OuputBuffer::writeFooter()
   sink_.write(&dest_buf_.front(), ret);
 }
 
-void LZ4OutputStream::LZ4OuputBuffer::close()
+void LZ4OutputStream::LZ4OutputBuffer::close()
 {
   if (closed_)
   {
