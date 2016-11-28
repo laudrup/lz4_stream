@@ -13,6 +13,4 @@ before_install:
 - docker build -t ubuntu/gcc-5 .
 
 script:
-- >
-  docker run -t -e CXX=$CXX -v $TRAVIS_BUILD_DIR:/lz4_stream ubuntu/gcc-5
-  /bin/bash -c "cd /lz4_stream && scons && ./lz4_stream_test"
+- docker run -t -e CXX=$CXX -v $TRAVIS_BUILD_DIR:/lz4_stream ubuntu/gcc-5
