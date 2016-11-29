@@ -22,7 +22,7 @@ LZ4InputStream::int_type LZ4InputStream::LZ4InputBuffer::underflow()
   if (offset_ == src_buf_size_)
   {
     source_.read(&src_buf_.front(), src_buf_.size());
-    src_buf_size_ = source_.gcount();
+    src_buf_size_ = static_cast<size_t>(source_.gcount());
     offset_ = 0;
   }
 

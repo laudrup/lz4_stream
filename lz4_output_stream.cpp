@@ -33,7 +33,7 @@ LZ4OutputStream::int_type LZ4OutputStream::LZ4OutputBuffer::overflow(int_type ch
 {
   assert(std::less_equal<char*>()(pptr(), epptr()));
 
-  *pptr() = ch;
+  *pptr() = static_cast<LZ4OutputStream::char_type>(ch);
   pbump(1);
 
   compressAndWrite();

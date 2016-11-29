@@ -18,7 +18,7 @@ if CXX in ["g++", "clang++"]:
     UNITTEST_LIBS += ["pthread"]
 elif CXX in ["cl", "cl.exe"]:
     STATIC_LIB += "_static"
-    CXXFLAGS = ["-W4", "-EHsc", "-MTd"]
+    CXXFLAGS = ["-W4", "-WX", "-EHsc", "-MTd"]
     LIBS = [File("%s.lib" % STATIC_LIB), File("liblz4.lib")]
     LIBRARY_SOURCES += ["liblz4.lib"]
 else:
