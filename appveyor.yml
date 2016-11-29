@@ -18,10 +18,9 @@ install:
   # Install Google test framework
   - curl -L -o googletest.zip https://github.com/google/googletest/archive/release-1.8.0.zip
   - mkdir googletest
-  - 7z x -ogoogletest googletest.zip
-  - mkdir googletest_build
+  - 7z x googletest.zip
   - cd googletest_build
-  - cmake ../googletest/googletest
+  - cmake ../googletest-release-1.8.0/googletest
   - msbuild gtest.sln
   - cp Debug/*.lib ..
   - cd ..
