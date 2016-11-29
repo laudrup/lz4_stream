@@ -1,6 +1,6 @@
 environment:
   CXX: cl
-  CPPPATH: lz4/include;googletest-release-1.8.0/googletest/include
+  CPPPATH: lz4/include;googletest/googletest/include
   matrix:
     - PYTHON: "C:\\Python27"
 
