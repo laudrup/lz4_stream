@@ -15,6 +15,7 @@ UNITTEST_LIBS = ["gtest"]
 if CXX in ["g++", "clang++"]:
     CXXFLAGS = ["-std=c++14", "-Wall", "-Wextra", "-Werror"]
     LIBS = [File("lib%s.a" % STATIC_LIB), "lz4"]
+    UNITTEST_LIBS += ["pthread"]
 elif CXX in ["cl", "cl.exe"]:
     STATIC_LIB += "_static"
     CXXFLAGS = ["-W4", "-EHsc", "-MTd"]
@@ -39,4 +40,4 @@ env.Program(target="lz4_decompress", source=["lz4_decompress.cpp"],
             LIBS=LIBS, LIBPATH=LIBPATH)
 
 env.Program(target="lz4_stream_test", source=["lz4_stream_test.cpp"],
-            LIBS=LIBS + ["gtest"], LIBPATH=LIBPATH)
+            LIBS=LIBS + UNITTEST_LIBS, LIBPATH=LIBPATH)
