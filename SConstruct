@@ -16,7 +16,7 @@ STATIC_LIB = "lz4_stream"
 UNITTEST_LIBS = ["gtest"]
 
 if CXX in ["g++", "clang++"]:
-    CXXFLAGS = ["-std=c++14", "-Wall", "-Wextra", "-Werror"]
+    CXXFLAGS = ["-std=c++11", "-Wall", "-Wextra", "-Werror"]
     LIBS = [File("lib%s.a" % STATIC_LIB), "lz4"]
     UNITTEST_LIBS += ["pthread"]
 elif CXX in ["cl", "cl.exe"]:
