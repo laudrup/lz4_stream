@@ -1,5 +1,8 @@
 import os
 
+from SCons.Script import Environment, File
+
+
 CXX = os.getenv("CXX", "g++")
 
 CPPPATH = []
