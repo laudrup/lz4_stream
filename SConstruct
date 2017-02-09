@@ -32,6 +32,10 @@ env = Environment(CXXFLAGS=CXXFLAGS,
                   CPPPATH=CPPPATH,
                   TARGET_ARCH="x86")
 
+env.Tool("compilation_db")
+compileCommands = env.CompilationDatabase('compile_commands.json')
+compileDb = env.Alias("compiledb", compileCommands)
+
 env.StaticLibrary(target=STATIC_LIB, source=LIBRARY_SOURCES)
 
 env.SharedLibrary(target="lz4_stream", source=LIBRARY_SOURCES)
