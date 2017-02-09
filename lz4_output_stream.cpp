@@ -8,15 +8,17 @@
 
 LZ4OutputStream::LZ4OutputBuffer::LZ4OutputBuffer(std::ostream &sink)
   : sink_(sink),
+    src_buf_{},
     // TODO: No need to recalculate the dest_buf_ size on each construction
-    dest_buf_(LZ4F_compressBound(src_buf_.size(), NULL)),
+    dest_buf_(LZ4F_compressBound(src_buf_.size(), nullptr)),
+    ctx_(nullptr),
     closed_(false)
 {
   char* base = &src_buf_.front();
   setp(base, base + src_buf_.size() - 1);
 
   size_t ret = LZ4F_createCompressionContext(&ctx_, LZ4F_VERSION);
-  if (LZ4F_isError(ret))
+  if (LZ4F_isError(ret) != 0)
   {
     throw std::runtime_error(std::string("Failed to create LZ4 compression context: ")
                              + LZ4F_getErrorName(ret));
@@ -53,15 +55,15 @@ void LZ4OutputStream::LZ4OutputBuffer::compressAndWrite()
   std::ptrdiff_t orig_size = pptr() - pbase();
   pbump(-orig_size);
   size_t comp_size = LZ4F_compressUpdate(ctx_, &dest_buf_.front(), dest_buf_.size(),
-                                         pbase(), orig_size, NULL);
+                                         pbase(), orig_size, nullptr);
   sink_.write(&dest_buf_.front(), comp_size);
 }
 
 void LZ4OutputStream::LZ4OutputBuffer::writeHeader()
 {
   assert(!closed_);
-  size_t ret = LZ4F_compressBegin(ctx_, &dest_buf_.front(), dest_buf_.size(), NULL);
-  if (LZ4F_isError(ret))
+  size_t ret = LZ4F_compressBegin(ctx_, &dest_buf_.front(), dest_buf_.size(), nullptr);
+  if (LZ4F_isError(ret) != 0)
   {
     throw std::runtime_error(std::string("Failed to start LZ4 compression: ")
                              + LZ4F_getErrorName(ret));
@@ -72,8 +74,8 @@ void LZ4OutputStream::LZ4OutputBuffer::writeHeader()
 void LZ4OutputStream::LZ4OutputBuffer::writeFooter()
 {
   assert(!closed_);
-  size_t ret = LZ4F_compressEnd(ctx_, &dest_buf_.front(), dest_buf_.size(), NULL);
-  if (LZ4F_isError(ret))
+  size_t ret = LZ4F_compressEnd(ctx_, &dest_buf_.front(), dest_buf_.size(), nullptr);
+  if (LZ4F_isError(ret) != 0)
   {
     throw std::runtime_error(std::string("Failed to end LZ4 compression: ")
                              + LZ4F_getErrorName(ret));

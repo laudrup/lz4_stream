@@ -2,9 +2,9 @@
 #include "lz4_stream.h"
 
 // Standard headers
-#include <iostream>
-#include <fstream>
 #include <algorithm>
+#include <fstream>
+#include <iostream>
 
 int main(int argc, char* argv[])
 {

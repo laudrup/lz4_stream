@@ -6,10 +6,11 @@ LZ4InputStream::LZ4InputBuffer::LZ4InputBuffer(std::istream &source)
     src_buf_(),
     dest_buf_(),
     offset_(0),
-    src_buf_size_(0)
+    src_buf_size_(0),
+    ctx_(nullptr)
 {
   size_t ret = LZ4F_createDecompressionContext(&ctx_, LZ4F_VERSION);
-  if (LZ4F_isError(ret))
+  if (LZ4F_isError(ret) != 0)
   {
     throw std::runtime_error(std::string("Failed to create LZ4 decompression context: ")
                              + LZ4F_getErrorName(ret));
@@ -34,9 +35,9 @@ LZ4InputStream::int_type LZ4InputStream::LZ4InputBuffer::underflow()
   size_t src_size = src_buf_size_ - offset_;
   size_t dest_size = dest_buf_.size();
   size_t ret = LZ4F_decompress(ctx_, &dest_buf_.front(), &dest_size,
-                               &src_buf_.front() + offset_, &src_size, NULL);
+                               &src_buf_.front() + offset_, &src_size, nullptr);
   offset_ += src_size;
-  if (LZ4F_isError(ret))
+  if (LZ4F_isError(ret) != 0)
   {
     throw std::runtime_error(std::string("LZ4 decompression failed: ")
                              + LZ4F_getErrorName(ret));
