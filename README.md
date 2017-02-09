@@ -38,7 +38,7 @@ License
 
 Standard BSD 3-Clause License as used by the LZ4 library.
 
-The Scons module for building a compilation database is taken from the [mongodb] project and is licensed under LGPLv3.
+The Scons module for building a compilation database is taken from the [mongodb] project and is licensed under the Apache license.
 
 [LZ4 compression library]: https://github.com/Cyan4973/lz4
 [SCons]: http://www.scons.org
