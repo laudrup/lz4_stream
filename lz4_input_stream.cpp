@@ -20,37 +20,57 @@ LZ4InputStream::LZ4InputBuffer::LZ4InputBuffer(std::istream &source)
 
 LZ4InputStream::int_type LZ4InputStream::LZ4InputBuffer::underflow()
 {
-  if (offset_ == src_buf_size_)
-  {
-    source_.read(&src_buf_.front(), src_buf_.size());
-    src_buf_size_ = static_cast<size_t>(source_.gcount());
-    offset_ = 0;
+  size_t ret;
+
+  while(true) {
+    if (srcPtr == srcEnd) {
+      source_.read(&src_buf_.front(), src_buf_.size());
+      src_buf_size_ = static_cast<size_t>(source_.gcount());
+
+      if (src_buf_size_ == 0) {
+        return traits_type::eof();
+      }
+
+      srcPtr = &src_buf_.front();
+      srcEnd = srcPtr + src_buf_size_;
+    }
+
+    if (!readHeader) {
+      LZ4F_frameInfo_t info;
+      ret = LZ4F_getFrameInfo(ctx_, &info, srcPtr, &src_buf_size_);
+      if (LZ4F_isError(ret)) {
+        throw std::runtime_error(std::string("LZ4F_getFrameInfo error: ")
+           + LZ4F_getErrorName(ret));
+      }
+
+      srcPtr += src_buf_size_;
+      src_buf_size_ = srcEnd - srcPtr;
+      readHeader = true;
+    }
+
+    while (srcPtr != srcEnd) {
+       /* INVARIANT: Any data left in dst has already been written */
+      size_t dstSize = dest_buf_.size();
+      ret = LZ4F_decompress(ctx_, &dest_buf_.front(), &dstSize, srcPtr,
+        &src_buf_size_, /* LZ4F_decompressOptions_t */ NULL);
+
+      if (LZ4F_isError(ret)) {
+        throw std::runtime_error(std::string("Decompression error: ")
+           + LZ4F_getErrorName(ret));
+      }
+
+      /* Update input */
+      srcPtr += src_buf_size_;
+      src_buf_size_ = srcEnd - srcPtr;
+
+      /* Flush output */
+      if (dstSize != 0) {
+        setg(&dest_buf_.front(), &dest_buf_.front(), &dest_buf_.front() + dstSize);
+
+        return traits_type::to_int_type(*gptr());
+      }
+    }
   }
-
-  if (src_buf_size_ == 0)
-  {
-    return traits_type::eof();
-  }
-
-  size_t src_size = src_buf_size_ - offset_;
-  size_t dest_size = dest_buf_.size();
-  size_t ret = LZ4F_decompress(ctx_, &dest_buf_.front(), &dest_size,
-                               &src_buf_.front() + offset_, &src_size, nullptr);
-  offset_ += src_size;
-  if (LZ4F_isError(ret) != 0)
-  {
-    throw std::runtime_error(std::string("LZ4 decompression failed: ")
-                             + LZ4F_getErrorName(ret));
-  }
-
-  if (dest_size == 0)
-  {
-    return traits_type::eof();
-  }
-
-  setg(&dest_buf_.front(), &dest_buf_.front(), &dest_buf_.front() + dest_size);
-
-  return traits_type::to_int_type(*gptr());
 }
 
 LZ4InputStream::LZ4InputBuffer::~LZ4InputBuffer()

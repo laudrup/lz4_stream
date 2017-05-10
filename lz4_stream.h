@@ -129,6 +129,11 @@ class LZ4InputStream : public std::istream
     size_t offset_;
     size_t src_buf_size_;
     LZ4F_decompressionContext_t ctx_;
+
+    char* srcPtr = nullptr;
+    char* srcEnd = nullptr;
+    bool readHeader = false;
+
   };
 
   LZ4InputBuffer* buffer_;
