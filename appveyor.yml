@@ -1,14 +1,22 @@
-environment:
-  CXX: cl
+clone_folder: c:\projects\lz4_stream
+
+image:
+  - Visual Studio 2013
+  - Visual Studio 2015
+  - Visual Studio 2017
 
 install:
   - git submodule update --init --recursive
 
-build_script:
-  - mkdir build
-  - cd build
-  - cmake ..
-  - devenv /build Debug lz4_stream.sln
+
+before_build:
+  - cmd: |-
+      mkdir build
+      cd build
+      cmake ..
+
+build:
+  project: c:\projects\lz4_stream\build\lz4_stream.sln
 
 test_script:
   - ctest -V
