@@ -10,6 +10,11 @@ if(MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /WX")
 else()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror")
+  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    # Temporary workaround googletest issue 1521:
+    # https://github.com/google/googletest/issues/1521
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-field-initializers")
+  endif()
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lz4/lib/lz4.h")
