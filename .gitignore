@@ -1,10 +1,1 @@
-.sconsign.dblite
-*.a
-*.o
-*.so
-*.os
-lz4_compress
-lz4_decompress
-lz4_stream_test
-compile_commands.json
-*.pyc
+build/

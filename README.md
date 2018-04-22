@@ -8,24 +8,25 @@ Usage
 
 Look at lz4\_compress.cpp and lz4\_decompress.cpp for example command line programs that can compress and decompress using this stream library.
 
-To build the library, example programs and test code make sure [SCons] is installed and run:
+Building
+--------
 
-    $ scons
-
-from the command line.
+```
+mkdir build
+cd build
+cmake ..
+make
+```
 
 Requirements
 ------------
 
 The [LZ4 compression library] is required to use this library.
 
-A SConstruct file is provided for building the code requiring [SCons] to be installed.
-
-To build and run the tests, [Google Test Framework] should be installed.
-
 Build status
 ------------
-Ubuntu (GCC/Clang):
+
+Ubuntu and OSX (GCC/Clang):
 
 [![Build Status](https://travis-ci.org/laudrup/lz4_stream.png)](https://travis-ci.org/laudrup/lz4_stream)
 
@@ -38,9 +39,6 @@ License
 
 Standard BSD 3-Clause License as used by the LZ4 library.
 
-The Scons module for building a compilation database is taken from the [mongodb] project and is licensed under the Apache license.
-
-[LZ4 compression library]: https://github.com/Cyan4973/lz4
-[SCons]: http://www.scons.org
+[LZ4 compression library]: https://github.com/lz4/lz4
+[cmake]: http://cmake.org
 [Google Test Framework]: https://github.com/google/googletest
-[mongodb]: https://github.com/mongodb/mongo

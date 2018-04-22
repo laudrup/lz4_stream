@@ -1,33 +1,11 @@
 environment:
   CXX: cl
-  CPPPATH: lz4/include;googletest-release-1.8.0/googletest/include
-  matrix:
-    - PYTHON: "C:\\Python27"
 
-install:
-  # Install SCons
-  - SET "PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-  - easy_install scons
-
-  # Install LZ4 library
-  - curl -L -o lz4.zip https://github.com/lz4/lz4/releases/download/v1.7.4.2/lz4_v1_7_4_win32.zip
-  - mkdir lz4
-  - 7z x -olz4 lz4.zip
-  - cp lz4/dll/liblz4.{dll,lib} .
-
-  # Install Google test framework
-  - curl -L -o googletest.zip https://github.com/google/googletest/archive/release-1.8.0.zip
-  - mkdir googletest
-  - 7z x googletest.zip
-  - mkdir googletest_build
-  - cd googletest_build
-  - cmake ../googletest-release-1.8.0/googletest
-  - msbuild gtest.sln
-  - cp Debug/*.lib ..
-  - cd ..
 build_script:
-  - scons
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
 
 test_script:
-  - lz4_stream_test
-
+  - ctest -V

@@ -1,16 +1,20 @@
-sudo: required
-
 language: cpp
+
+sudo: false
 
 compiler:
   - gcc
   - clang
 
-services:
-  - docker
+os:
+  - linux
+  - osx
 
-before_install:
-- docker build -t ubuntu/gcc-5 .
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
 
 script:
-- docker run -t -e CXX=$CXX -v $TRAVIS_BUILD_DIR:/lz4_stream ubuntu/gcc-5
+  - ctest -V
