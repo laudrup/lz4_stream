@@ -8,7 +8,7 @@ build_script:
   - mkdir build
   - cd build
   - cmake ..
-  - make
+  - devenv /build Debug lz4_stream.sln
 
 test_script:
   - ctest -V
