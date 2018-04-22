@@ -8,7 +8,7 @@
 
 LZ4OutputStream::LZ4OutputBuffer::LZ4OutputBuffer(std::ostream &sink)
   : sink_(sink),
-    src_buf_{},
+    src_buf_(),
     // TODO: No need to recalculate the dest_buf_ size on each construction
     dest_buf_(LZ4F_compressBound(src_buf_.size(), nullptr)),
     ctx_(nullptr),
