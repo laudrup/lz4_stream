@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 project(lz4_stream)
 
-include(ExternalProject)
-
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 
@@ -16,6 +14,18 @@ else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-field-initializers")
   endif()
 endif()
+
+set(CMAKE_CXX_FLAGS_COVERAGE
+  "${GCC_DEBUG_FLAGS} -fprofile-arcs -ftest-coverage"
+  CACHE STRING "Flags used by the C++ compiler during coverage builds."
+  FORCE)
+set(CMAKE_EXE_LINKER_FLAGS_COVERAGE
+  "${CMAKE_EXE_LINKER_FLAGS} --coverage"
+  CACHE STRING "Flags used for linking binaries during coverage builds."
+  FORCE)
+mark_as_advanced(
+  CMAKE_CXX_FLAGS_COVERAGE
+  CMAKE_EXE_LINKER_FLAGS_COVERAGE)
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lz4/lib/lz4.h")
   set(LZ4_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/lz4)
@@ -47,14 +57,6 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/googletest/CMakeLists.txt")
   add_test(lz4_stream_test lz4_stream_test)
 else()
   message(STATUS "googletest submodule not found. Tests disabled.")
-endif()
-
-if(ENABLE_COVERAGE)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftest-coverage")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 endif()
 
 add_library(lz4_stream STATIC lz4_input_stream.cpp lz4_output_stream.cpp)

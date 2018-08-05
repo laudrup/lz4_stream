@@ -2,9 +2,16 @@ language: cpp
 
 sudo: false
 
-compiler:
-  - gcc
-  - clang
+matrix:
+  include:
+    - compiler: gcc
+      env: BUILD_TYPE=Coverage
+    - compiler: gcc
+      env: BUILD_TYPE=Debug
+    - compiler: gcc
+      env: BUILD_TYPE=Release
+    - compiler: clang
+      env: BUILD_TYPE=Debug
 
 os:
   - linux
@@ -13,11 +20,12 @@ os:
 before_script:
   - mkdir build
   - cd build
-  - cmake -DENABLE_COVERAGE=ON ..
+  - cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} ..
   - make
 
 script:
   - ctest -V
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - if [ "${BUILD_TYPE}" == "Coverage" ]; then bash <(curl -s https://codecov.io/bash); fi
+
