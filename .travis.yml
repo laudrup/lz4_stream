@@ -13,8 +13,11 @@ os:
 before_script:
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DENABLE_COVERAGE=ON ..
   - make
 
 script:
   - ctest -V
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

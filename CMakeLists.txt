@@ -49,6 +49,14 @@ else()
   message(STATUS "googletest submodule not found. Tests disabled.")
 endif()
 
+if(ENABLE_COVERAGE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftest-coverage")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+endif()
+
 add_library(lz4_stream STATIC lz4_input_stream.cpp lz4_output_stream.cpp)
 target_link_libraries(lz4_stream lz4)
 
