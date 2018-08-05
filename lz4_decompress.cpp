@@ -10,7 +10,8 @@ int main(int argc, char* argv[])
 {
   if (argc != 3)
   {
-    std::cerr << "Usage: " << argv[0] << " [inputfile] [outputfile]" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " inputfile outputfile" << std::endl;
+    return 1;
   }
   std::ifstream in_file(argv[1]);
   std::ofstream out_file(argv[2]);
