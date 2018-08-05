@@ -34,6 +34,10 @@ Windows (MS C++):
 
 [![Build status](https://ci.appveyor.com/api/projects/status/xrp8bjf9217broom?svg=true)](https://ci.appveyor.com/project/laudrup/lz4-stream)
 
+Code coverage (codecov.io):
+
+[![codecov](https://codecov.io/gh/laudrup/lz4_stream/branch/master/graph/badge.svg)](https://codecov.io/gh/laudrup/lz4_stream)
+
 License
 -------
 
