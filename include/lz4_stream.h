@@ -5,12 +5,13 @@
 #include <lz4frame.h>
 
 // Standard headers
-#include <cassert>
-#include <streambuf>
-#include <iostream>
-#include <vector>
-#include <memory>
 #include <array>
+#include <cassert>
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <streambuf>
+#include <vector>
 
 /**
  * @brief An output stream that will LZ4 compress the input data.
@@ -108,7 +109,7 @@ class LZ4OutputStream : public std::ostream
     void compressAndWrite() {
       // TODO: Throw exception instead or set badbit
       assert(!closed_);
-      std::ptrdiff_t orig_size = pptr() - pbase();
+      int orig_size = static_cast<int>(pptr() - pbase());
       pbump(-orig_size);
       size_t comp_size = LZ4F_compressUpdate(ctx_, &dest_buf_.front(), dest_buf_.size(),
                                              pbase(), orig_size, nullptr);

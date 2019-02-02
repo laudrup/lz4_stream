@@ -1,22 +1,39 @@
-clone_folder: c:\projects\lz4_stream
+version: '{build}'
 
-image:
-  - Visual Studio 2013
-  - Visual Studio 2015
-  - Visual Studio 2017
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x86
+      CXX_FLAGS: ""
+      LINKER_FLAGS: ""
+      GENERATOR: Visual Studio 14 2015
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      platform: x86
+      CXX_FLAGS: ""
+      LINKER_FLAGS: ""
+      GENERATOR: Visual Studio 15 2017
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x64
+      CXX_FLAGS: ""
+      LINKER_FLAGS: ""
+      GENERATOR: Visual Studio 14 2015 Win64
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      platform: x64
+      CXX_FLAGS: ""
+      LINKER_FLAGS: ""
+      GENERATOR: Visual Studio 15 2017 Win64
 
 install:
   - git submodule update --init --recursive
 
-
 before_build:
-  - cmd: |-
-      mkdir build
-      cd build
-      cmake ..
+  - cmake . -G "%GENERATOR%"
 
-build:
-  project: c:\projects\lz4_stream\build\lz4_stream.sln
+build_script:
+  - cmake --build . --config Release
 
 test_script:
-  - ctest -V
+  - ctest -C Release -V -j
