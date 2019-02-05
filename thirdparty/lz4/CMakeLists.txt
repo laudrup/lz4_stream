@@ -1,6 +1,5 @@
 if(MSVC)
-  # TODO: Support debug build
-  set(BUILD_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} /property:PlatformToolset=${CMAKE_VS_PLATFORM_TOOLSET} /p:Configuration=Release /p:Platform=${CMAKE_VS_PLATFORM_NAME} "visual/VS2010/lz4.sln")
+  set(BUILD_COMMAND ${CMAKE_VS_MSBUILD_COMMAND} /property:PlatformToolset=${CMAKE_VS_PLATFORM_TOOLSET} /p:Configuration=$<CONFIG> /p:Platform=${CMAKE_VS_PLATFORM_NAME} "visual/VS2010/lz4.sln")
 else()
   set(BUILD_COMMAND make)
 endif()
@@ -21,7 +20,7 @@ ExternalProject_Get_property(LibLz4 BINARY_DIR)
 add_library(lz4 INTERFACE)
 
 if(MSVC)
-  target_link_libraries(lz4 INTERFACE ${BINARY_DIR}/visual/VS2010/bin/${CMAKE_VS_PLATFORM_NAME}_Release/liblz4_static.lib)
+  target_link_libraries(lz4 INTERFACE ${BINARY_DIR}/visual/VS2010/bin/${CMAKE_VS_PLATFORM_NAME}_$<CONFIG>/liblz4_static.lib)
 else()
   target_link_libraries(lz4 INTERFACE ${BINARY_DIR}/lib/liblz4.a)
 endif()

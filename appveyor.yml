@@ -4,27 +4,43 @@ environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       platform: x86
-      CXX_FLAGS: ""
-      LINKER_FLAGS: ""
       GENERATOR: Visual Studio 14 2015
+      CONFIG: Release
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x86
+      GENERATOR: Visual Studio 14 2015
+      CONFIG: Debug
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       platform: x86
-      CXX_FLAGS: ""
-      LINKER_FLAGS: ""
       GENERATOR: Visual Studio 15 2017
+      CONFIG: Release
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      platform: x86
+      GENERATOR: Visual Studio 15 2017
+      CONFIG: Debug
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       platform: x64
-      CXX_FLAGS: ""
-      LINKER_FLAGS: ""
       GENERATOR: Visual Studio 14 2015 Win64
+      CONFIG: Release
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      platform: x64
+      GENERATOR: Visual Studio 14 2015 Win64
+      CONFIG: Debug
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       platform: x64
-      CXX_FLAGS: ""
-      LINKER_FLAGS: ""
       GENERATOR: Visual Studio 15 2017 Win64
+      CONFIG: Release
+
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      platform: x64
+      GENERATOR: Visual Studio 15 2017 Win64
+      CONFIG: Debug
 
 install:
   - git submodule update --init --recursive
@@ -33,7 +49,7 @@ before_build:
   - cmake . -G "%GENERATOR%"
 
 build_script:
-  - cmake --build . --config Release
+  - cmake --build . --config "%CONFIG%"
 
 test_script:
-  - ctest -C Release -V -j
+  - ctest -C "%CONFIG%" -V -j
