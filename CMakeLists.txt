@@ -46,7 +46,7 @@ else()
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(LZ4 REQUIRED liblz4)
   target_include_directories(${LZ4_STREAM_LIBRARY_NAME} INTERFACE ${LZ4_INCLUDE_DIR})
-  target_link_libraries(${LZ4_STREAM_LIBRARY_NAME} INTERFACE ${LZ4_LIBRARY})
+  target_link_libraries(${LZ4_STREAM_LIBRARY_NAME} INTERFACE ${LZ4_LIBRARIES})
 endif()
 
 # TODO: Use external project
