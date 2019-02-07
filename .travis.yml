@@ -19,6 +19,10 @@ addons:
     update: true
     packages:
       - liblz4-dev
+  homebrew:
+    update: true
+    packages:
+    - lz4
 
 os:
   - linux
