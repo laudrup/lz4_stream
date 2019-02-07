@@ -5,8 +5,8 @@ project(lz4_stream LANGUAGES CXX)
 include(ExternalProject)
 
 option(LZ4_STREAM_UseBundledLz4 "Use bundled static LZ4 library" OFF)
+option(LZ4_STREAM_BuildTests "Build unittests" ON)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(LZ4_STREAM_LIBRARY_NAME ${PROJECT_NAME})
@@ -49,29 +49,13 @@ else()
   target_link_libraries(${LZ4_STREAM_LIBRARY_NAME} INTERFACE ${LZ4_LIBRARIES})
 endif()
 
-# TODO: Use external project
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/googletest/CMakeLists.txt")
-  set(GTEST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/googletest)
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-  add_subdirectory(${GTEST_ROOT})
+if(LZ4_STREAM_BuildTests)
   enable_testing()
-
-  add_executable(lz4_stream_test lz4_stream_test.cpp)
-  include_directories(lz4_stream_test ${GTEST_ROOT}/googletest/include)
-  target_link_libraries(lz4_stream_test gtest ${LZ4_STREAM_LIBRARY_NAME})
-
-  if(NOT MSVC)
-    # TODO: Use thread package
-    find_package(Threads REQUIRED)
-    target_link_libraries(lz4_stream_test pthread)
-  endif()
-
-  add_test(lz4_stream_test lz4_stream_test)
-else()
-  message(STATUS "googletest submodule not found. Tests disabled.")
+  add_subdirectory("thirdparty/catch2")
+  add_subdirectory("test")
 endif()
 
-# Create test executables
+# Create example executables
 # TODO: Move to own directory
 add_executable(lz4_compress lz4_compress.cpp)
 target_link_libraries(lz4_compress ${LZ4_STREAM_LIBRARY_NAME})

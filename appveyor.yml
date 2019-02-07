@@ -42,9 +42,6 @@ environment:
       GENERATOR: Visual Studio 15 2017 Win64
       CONFIG: Debug
 
-install:
-  - git submodule update --init --recursive
-
 before_build:
   - cmake . -G "%GENERATOR%" -DLZ4_STREAM_UseBundledLz4=ON
 
