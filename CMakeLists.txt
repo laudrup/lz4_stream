@@ -4,6 +4,8 @@ project(lz4_stream LANGUAGES CXX)
 
 include(ExternalProject)
 
+option(LZ4_STREAM_UseBundledLz4 "Use bundled static LZ4 library" OFF)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -35,15 +37,16 @@ mark_as_advanced(
 add_library(${LZ4_STREAM_LIBRARY_NAME} INTERFACE)
 target_include_directories(${LZ4_STREAM_LIBRARY_NAME} INTERFACE ${LZ4_STREAM_LIBRARY_INCLUDE_DIR})
 
-find_package(LZ4)
-if(LZ4_FOUND)
-  target_include_directories(${LZ4_STREAM_LIBRARY_NAME} INTERFACE ${LZ4_INCLUDE_DIR})
-  target_link_libraries(${LZ4_STREAM_LIBRARY_NAME} INTERFACE ${LZ4_LIBRARY})
-else()
+if(LZ4_STREAM_UseBundledLz4)
   message(STATUS "Using bundled LZ4 library")
   add_subdirectory("thirdparty/lz4")
   target_link_libraries(${LZ4_STREAM_LIBRARY_NAME} INTERFACE lz4)
   target_include_directories(${LZ4_STREAM_LIBRARY_NAME} INTERFACE lz4)
+else()
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(LZ4 REQUIRED liblz4)
+  target_include_directories(${LZ4_STREAM_LIBRARY_NAME} INTERFACE ${LZ4_INCLUDE_DIR})
+  target_link_libraries(${LZ4_STREAM_LIBRARY_NAME} INTERFACE ${LZ4_LIBRARY})
 endif()
 
 # TODO: Use external project
