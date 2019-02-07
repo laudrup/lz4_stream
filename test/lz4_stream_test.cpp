@@ -12,14 +12,14 @@ std::string compress_decompress_string(const std::string& input_string)
   std::stringstream input_stream(input_string);
   std::stringstream compressed_stream;
 
-  LZ4OutputStream lz4_out_stream(compressed_stream);
+  lz4_stream::ostream lz4_out_stream(compressed_stream);
 
   std::copy(std::istreambuf_iterator<char>(input_stream),
             std::istreambuf_iterator<char>(),
             std::ostreambuf_iterator<char>(lz4_out_stream));
   lz4_out_stream.close();
 
-  LZ4InputStream lz4_in_stream(compressed_stream);
+  lz4_stream::istream lz4_in_stream(compressed_stream);
   std::stringstream decompressed_stream;
 
   std::copy(std::istreambuf_iterator<char>(lz4_in_stream),

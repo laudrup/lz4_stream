@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
   std::ifstream in_file(argv[1]);
   std::ofstream out_file(argv[2]);
 
-  LZ4InputStream lz4_stream(in_file);
+  lz4_stream::istream lz4_stream(in_file);
 
   std::copy(std::istreambuf_iterator<char>(lz4_stream),
             std::istreambuf_iterator<char>(),
