@@ -202,7 +202,8 @@ class basic_istream : public std::istream
     }
 
     int_type underflow() override {
-      while (true) {
+      size_t written_size = 0;
+      while (written_size == 0) {
         if (offset_ == src_buf_size_) {
           source_.read(&src_buf_.front(), src_buf_.size());
           src_buf_size_ = static_cast<size_t>(source_.gcount());
@@ -217,17 +218,16 @@ class basic_istream : public std::istream
         size_t dest_size = dest_buf_.size();
         size_t ret = LZ4F_decompress(ctx_, &dest_buf_.front(), &dest_size,
                                      &src_buf_.front() + offset_, &src_size, nullptr);
+        written_size = dest_size;
         offset_ += src_size;
         if (LZ4F_isError(ret) != 0) {
           throw std::runtime_error(std::string("LZ4 decompression failed: ")
                                    + LZ4F_getErrorName(ret));
         }
 
-        if (dest_size != 0) {
-          setg(&dest_buf_.front(), &dest_buf_.front(), &dest_buf_.front() + dest_size);
-          return traits_type::to_int_type(*gptr());
-        }
       }
+      setg(&dest_buf_.front(), &dest_buf_.front(), &dest_buf_.front() + written_size);
+      return traits_type::to_int_type(*gptr());
     }
 
     input_buffer(const input_buffer&) = delete;
