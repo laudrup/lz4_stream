@@ -73,8 +73,6 @@ class basic_ostream : public std::ostream
         throw std::runtime_error(std::string("Failed to create LZ4 compression context: ")
                                  + LZ4F_getErrorName(ret));
       }
-      // TODO: This can leak ctx_ if it throws. Use a unique_ptr.
-      write_header();
     }
 
     ~output_buffer() {
@@ -98,6 +96,10 @@ class basic_ostream : public std::ostream
       *pptr() = static_cast<basic_ostream::char_type>(ch);
       pbump(1);
 
+      if (!header_written_) {
+        write_header();
+        header_written_ = true;
+      }
       compress_and_write();
 
       return ch;
@@ -144,6 +146,7 @@ class basic_ostream : public std::ostream
     std::vector<char> dest_buf_;
     LZ4F_compressionContext_t ctx_;
     bool closed_;
+    bool header_written_ = false;
   };
 
   output_buffer* buffer_;

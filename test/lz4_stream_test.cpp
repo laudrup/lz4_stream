@@ -5,32 +5,13 @@
 
 #include "lz4_stream.h"
 
-namespace
-{
-std::string compress_decompress_string(const std::string& input_string)
-{
-  std::stringstream input_stream(input_string);
+TEST_CASE("Lz4Stream") {
   std::stringstream compressed_stream;
-
-  lz4_stream::ostream lz4_out_stream(compressed_stream);
-
-  std::copy(std::istreambuf_iterator<char>(input_stream),
-            std::istreambuf_iterator<char>(),
-            std::ostreambuf_iterator<char>(lz4_out_stream));
-  lz4_out_stream.close();
-
-  lz4_stream::istream lz4_in_stream(compressed_stream);
   std::stringstream decompressed_stream;
 
-  std::copy(std::istreambuf_iterator<char>(lz4_in_stream),
-            std::istreambuf_iterator<char>(),
-            std::ostreambuf_iterator<char>(decompressed_stream));
+  lz4_stream::ostream lz4_out_stream(compressed_stream);
+  lz4_stream::istream lz4_in_stream(compressed_stream);
 
-  return decompressed_stream.str();
-}
-}
-
-TEST_CASE("Lz4Stream") {
   std::string test_string =
     "Three Rings for the Elven-kings under the sky,\n"
     "Seven for the Dwarf-lords in their halls of stone,\n"
@@ -42,15 +23,54 @@ TEST_CASE("Lz4Stream") {
     "In the Land of Mordor where the Shadows lie.\n";
 
   SECTION("Default compression/decompression") {
-    CHECK(compress_decompress_string(test_string) == test_string);
+    lz4_out_stream << test_string;
+    lz4_out_stream.close();
+    decompressed_stream << lz4_in_stream.rdbuf();
+
+    CHECK(decompressed_stream.str() == test_string);
   }
 
   SECTION("Empty data") {
-    CHECK(compress_decompress_string("") == "");
+    lz4_out_stream.close();
+    decompressed_stream << lz4_in_stream.rdbuf();
+
+    CHECK(decompressed_stream.str() == "");
   }
 
   SECTION("All zeroes") {
-    std::string zero_string(1024, '\0');
-    CHECK(compress_decompress_string(zero_string) == zero_string);
+    lz4_out_stream << std::string(1024, '\0');
+    lz4_out_stream.close();
+    decompressed_stream << lz4_in_stream.rdbuf();
+
+    CHECK(decompressed_stream.str() == std::string(1024, '\0'));
   }
+
+  SECTION("Small output buffer") {
+    lz4_stream::basic_ostream<8> lz4_out_stream(compressed_stream);
+    lz4_out_stream << test_string;
+    lz4_out_stream.close();
+    decompressed_stream << lz4_in_stream.rdbuf();
+
+    CHECK(decompressed_stream.str() == test_string);
+  }
+
+  SECTION("Small input buffer") {
+    lz4_stream::basic_istream<8> lz4_in_stream(compressed_stream);
+    lz4_out_stream << test_string;
+    lz4_out_stream.close();
+    decompressed_stream << lz4_in_stream.rdbuf();
+
+    CHECK(decompressed_stream.str() == test_string);
+  }
+
+  SECTION("Small input and ouput buffer") {
+    lz4_stream::basic_istream<8> lz4_in_stream(compressed_stream);
+    lz4_stream::basic_ostream<8> lz4_out_stream(compressed_stream);
+    lz4_out_stream << test_string;
+    lz4_out_stream.close();
+    decompressed_stream << lz4_in_stream.rdbuf();
+
+    CHECK(decompressed_stream.str() == test_string);
+  }
+
 }
