@@ -115,9 +115,13 @@ class basic_ostream : public std::ostream
       assert(!closed_);
       int orig_size = static_cast<int>(pptr() - pbase());
       pbump(-orig_size);
-      size_t comp_size = LZ4F_compressUpdate(ctx_, &dest_buf_.front(), dest_buf_.size(),
+      size_t ret = LZ4F_compressUpdate(ctx_, &dest_buf_.front(), dest_buf_.size(),
                                              pbase(), orig_size, nullptr);
-      sink_.write(&dest_buf_.front(), comp_size);
+      if (LZ4F_isError(ret) != 0) {
+        throw std::runtime_error(std::string("LZ4 compression failed: ")
+                                 + LZ4F_getErrorName(ret));
+      }
+      sink_.write(&dest_buf_.front(), ret);
     }
 
     void write_header() {
@@ -218,13 +222,12 @@ class basic_istream : public std::istream
         size_t dest_size = dest_buf_.size();
         size_t ret = LZ4F_decompress(ctx_, &dest_buf_.front(), &dest_size,
                                      &src_buf_.front() + offset_, &src_size, nullptr);
-        written_size = dest_size;
-        offset_ += src_size;
         if (LZ4F_isError(ret) != 0) {
           throw std::runtime_error(std::string("LZ4 decompression failed: ")
                                    + LZ4F_getErrorName(ret));
         }
-
+        written_size = dest_size;
+        offset_ += src_size;
       }
       setg(&dest_buf_.front(), &dest_buf_.front(), &dest_buf_.front() + written_size);
       return traits_type::to_int_type(*gptr());
