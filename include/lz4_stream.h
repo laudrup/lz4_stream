@@ -159,7 +159,7 @@ class basic_ostream : public std::ostream
  * decompress its output data to that stream.
  *
  */
-template <size_t SrcBufSize = 64 * 1024, size_t DestBufSize = 64 * 1024>
+template <size_t SrcBufSize = 256, size_t DestBufSize = 256>
 class basic_istream : public std::istream
 {
  public:
