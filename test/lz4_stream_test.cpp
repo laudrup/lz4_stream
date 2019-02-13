@@ -7,7 +7,6 @@
 
 TEST_CASE("Lz4Stream") {
   std::stringstream compressed_stream;
-  std::stringstream decompressed_stream;
 
   lz4_stream::ostream lz4_out_stream(compressed_stream);
   lz4_stream::istream lz4_in_stream(compressed_stream);
@@ -25,24 +24,21 @@ TEST_CASE("Lz4Stream") {
   SECTION("Default compression/decompression") {
     lz4_out_stream << test_string;
     lz4_out_stream.close();
-    decompressed_stream << lz4_in_stream.rdbuf();
 
-    CHECK(decompressed_stream.str() == test_string);
+    CHECK(std::string(std::istreambuf_iterator<char>(lz4_in_stream), {}) == test_string);
   }
 
   SECTION("Empty data") {
     lz4_out_stream.close();
-    decompressed_stream << lz4_in_stream.rdbuf();
 
-    CHECK(decompressed_stream.str() == "");
+    CHECK(std::string(std::istreambuf_iterator<char>(lz4_in_stream), {}).empty());
   }
 
   SECTION("All zeroes") {
     lz4_out_stream << std::string(1024, '\0');
     lz4_out_stream.close();
-    decompressed_stream << lz4_in_stream.rdbuf();
 
-    CHECK(decompressed_stream.str() == std::string(1024, '\0'));
+    CHECK(std::string(std::istreambuf_iterator<char>(lz4_in_stream), {}) == std::string(1024, '\0'));
   }
 
   SECTION("Small output buffer") {
@@ -51,18 +47,16 @@ TEST_CASE("Lz4Stream") {
     lz4_stream::istream lz4_in_stream(compressed_stream);
     lz4_out_stream << test_string;
     lz4_out_stream.close();
-    decompressed_stream << lz4_in_stream.rdbuf();
 
-    CHECK(decompressed_stream.str() == test_string);
+    CHECK(std::string(std::istreambuf_iterator<char>(lz4_in_stream), {}) == test_string);
   }
 
   SECTION("Small input buffer") {
     lz4_stream::basic_istream<8, 8> lz4_in_stream(compressed_stream);
     lz4_out_stream << test_string;
     lz4_out_stream.close();
-    decompressed_stream << lz4_in_stream.rdbuf();
 
-    CHECK(decompressed_stream.str() == test_string);
+    CHECK(std::string(std::istreambuf_iterator<char>(lz4_in_stream), {}) == test_string);
   }
 
   SECTION("Small input and ouput buffer") {
@@ -71,8 +65,7 @@ TEST_CASE("Lz4Stream") {
     lz4_stream::basic_ostream<8> lz4_out_stream(compressed_stream);
     lz4_out_stream << test_string;
     lz4_out_stream.close();
-    decompressed_stream << lz4_in_stream.rdbuf();
 
-    CHECK(decompressed_stream.str() == test_string);
+    CHECK(std::string(std::istreambuf_iterator<char>(lz4_in_stream), {}) == test_string);
   }
 }
