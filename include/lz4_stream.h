@@ -123,7 +123,6 @@ class basic_ostream : public std::ostream
     void write_header() {
       // TODO: Throw exception instead or set badbit
       assert(!closed_);
-      assert(dest_buf_.capacity() >= LZ4F_HEADER_SIZE_MAX);
       size_t ret = LZ4F_compressBegin(ctx_, &dest_buf_.front(), dest_buf_.capacity(), nullptr);
       if (LZ4F_isError(ret) != 0) {
         throw std::runtime_error(std::string("Failed to start LZ4 compression: ")
