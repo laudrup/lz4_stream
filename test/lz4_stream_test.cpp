@@ -46,7 +46,9 @@ TEST_CASE("Lz4Stream") {
   }
 
   SECTION("Small output buffer") {
+    std::stringstream compressed_stream;
     lz4_stream::basic_ostream<8> lz4_out_stream(compressed_stream);
+    lz4_stream::istream lz4_in_stream(compressed_stream);
     lz4_out_stream << test_string;
     lz4_out_stream.close();
     decompressed_stream << lz4_in_stream.rdbuf();
@@ -55,7 +57,7 @@ TEST_CASE("Lz4Stream") {
   }
 
   SECTION("Small input buffer") {
-    lz4_stream::basic_istream<8> lz4_in_stream(compressed_stream);
+    lz4_stream::basic_istream<8, 8> lz4_in_stream(compressed_stream);
     lz4_out_stream << test_string;
     lz4_out_stream.close();
     decompressed_stream << lz4_in_stream.rdbuf();
@@ -64,7 +66,8 @@ TEST_CASE("Lz4Stream") {
   }
 
   SECTION("Small input and ouput buffer") {
-    lz4_stream::basic_istream<8> lz4_in_stream(compressed_stream);
+    std::stringstream compressed_stream;
+    lz4_stream::basic_istream<8, 8> lz4_in_stream(compressed_stream);
     lz4_stream::basic_ostream<8> lz4_out_stream(compressed_stream);
     lz4_out_stream << test_string;
     lz4_out_stream.close();
@@ -72,5 +75,4 @@ TEST_CASE("Lz4Stream") {
 
     CHECK(decompressed_stream.str() == test_string);
   }
-
 }
