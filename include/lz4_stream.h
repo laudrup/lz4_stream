@@ -1,5 +1,4 @@
-#ifndef LZ4_STREAM
-#define LZ4_STREAM
+#pragma once
 
 // LZ4 Headers
 #include <lz4frame.h>
@@ -13,237 +12,260 @@
 #include <streambuf>
 #include <vector>
 
-namespace lz4_stream {
-/**
- * @brief An output stream that will LZ4 compress the input data.
- *
- * An output stream that will wrap another output stream and LZ4
- * compress its input data to that stream.
- *
- */
-template <size_t SrcBufSize = 256>
-class basic_ostream : public std::ostream
+namespace lz4_stream
 {
- public:
-  /**
-   * @brief Constructs an LZ4 compression output stream
-   *
-   * @param sink The stream to write compressed data to
-   */
-  basic_ostream(std::ostream& sink)
-    : std::ostream(new output_buffer(sink)),
-      buffer_(dynamic_cast<output_buffer*>(rdbuf())) {
-    assert(buffer_);
-  }
+template<size_t SrcBufSize = 256>
+class basic_ostream: public std::ostream
+{
+public:
+	explicit basic_ostream(std::ostream &ioSink)
+		: std::ostream{new output_buffer{ioSink}}
+		, m_buffer(reinterpret_cast<output_buffer *>(rdbuf()))
+	{
+		assert(m_buffer);
+	}
 
-  /**
-   * @brief Destroys the LZ4 output stream. Calls close() if not already called.
-   */
-  ~basic_ostream() {
-    close();
-    delete buffer_;
-  }
+	~basic_ostream() final
+	{
+		this->Close();
+		delete[] m_buffer;
+	}
 
-  /**
-   * @brief Flushes and writes LZ4 footer data to the LZ4 output stream.
-   *
-   * After calling this function no more data should be written to the stream.
-   */
-  void close() {
-    buffer_->close();
-  }
+	void Close()
+	{
+		m_buffer->Close();
+	}
 
- private:
-  class output_buffer : public std::streambuf {
-  public:
-    output_buffer(const output_buffer &) = delete;
-    output_buffer& operator= (const output_buffer &) = delete;
+private:
+	class output_buffer: public std::streambuf
+	{
+	public:
+		output_buffer(const output_buffer &) = delete;
+		output_buffer &operator=(const output_buffer &) = delete;
 
-    output_buffer(std::ostream &sink)
-      : sink_(sink),
-        // TODO: No need to recalculate the dest_buf_ size on each construction
-        dest_buf_(LZ4F_compressBound(src_buf_.size(), nullptr)),
-        ctx_(nullptr),
-        closed_(false) {
-      char* base = &src_buf_.front();
-      setp(base, base + src_buf_.size() - 1);
+		explicit output_buffer(std::ostream &sink)
+			: m_sink{sink}
+			// TODO: No need to recalculate the m_destinationBuffer size on each construction
+			, m_destinationBuffer{LZ4F_compressBound(m_sourceBuffer.size(), nullptr)}
+			, m_context{nullptr}
+			, m_closed{false}
+		{
+			char const *const base = m_sourceBuffer.data();
+			setp(base, base + m_sourceBuffer.size() - 1);
 
-      size_t ret = LZ4F_createCompressionContext(&ctx_, LZ4F_VERSION);
-      if (LZ4F_isError(ret) != 0) {
-        throw std::runtime_error(std::string("Failed to create LZ4 compression context: ")
-                                 + LZ4F_getErrorName(ret));
-      }
-      write_header();
-    }
+			std::size_t const result = LZ4F_createCompressionContext(&m_context, LZ4F_VERSION);
+			if (LZ4F_isError(result) not_eq 0) {
+				std::string error;
+				error += "Failed to create LZ4 compression context: ";
+				error += LZ4F_getErrorName(result);
+				throw std::runtime_error{error};
+			}
+			this->WriteHeader();
+		}
 
-    ~output_buffer() {
-      close();
-    }
+		~output_buffer() final
+		{
+			this->Close();
+		}
 
-    void close() {
-      if (closed_) {
-        return;
-      }
-      sync();
-      write_footer();
-      LZ4F_freeCompressionContext(ctx_);
-      closed_ = true;
-    }
+		void Close()
+		{
+			if (m_closed)
+				return;
 
-  private:
-    int_type overflow(int_type ch) override {
-      assert(std::less_equal<char*>()(pptr(), epptr()));
+			this->sync();
+			this->WriteFooter();
+			LZ4F_freeCompressionContext(m_context);
+			m_closed = true;
+		}
 
-      *pptr() = static_cast<basic_ostream::char_type>(ch);
-      pbump(1);
-      compress_and_write();
+	private:
+		int_type overflow(int_type iCharacter) final
+		{
+			assert(std::less_equal<char *>()(pptr(), epptr()));
 
-      return ch;
-    }
+			*pptr() = static_cast<basic_ostream::char_type>(iCharacter);
+			pbump(1);
+			this->CompressAndWrite();
 
-    int_type sync() override {
-      compress_and_write();
-      return 0;
-    }
+			return iCharacter;
+		}
 
-    void compress_and_write() {
-      // TODO: Throw exception instead or set badbit
-      assert(!closed_);
-      int orig_size = static_cast<int>(pptr() - pbase());
-      pbump(-orig_size);
-      size_t ret = LZ4F_compressUpdate(ctx_, &dest_buf_.front(), dest_buf_.capacity(),
-                                             pbase(), orig_size, nullptr);
-      if (LZ4F_isError(ret) != 0) {
-        throw std::runtime_error(std::string("LZ4 compression failed: ")
-                                 + LZ4F_getErrorName(ret));
-      }
-      sink_.write(&dest_buf_.front(), ret);
-    }
+		int_type sync() final
+		{
+			this->CompressAndWrite();
+			return 0;
+		}
 
-    void write_header() {
-      // TODO: Throw exception instead or set badbit
-      assert(!closed_);
-      size_t ret = LZ4F_compressBegin(ctx_, &dest_buf_.front(), dest_buf_.capacity(), nullptr);
-      if (LZ4F_isError(ret) != 0) {
-        throw std::runtime_error(std::string("Failed to start LZ4 compression: ")
-                                 + LZ4F_getErrorName(ret));
-      }
-      sink_.write(&dest_buf_.front(), ret);
-    }
+		void CompressAndWrite()
+		{
+			// TODO: Throw exception instead or set badbit
+			assert(!m_closed);
+			auto const orig_size = static_cast<std::int32_t>(pptr() - pbase());
+			pbump(-orig_size);
+			std::size_t const result = LZ4F_compressUpdate(
+				m_context,
+				m_destinationBuffer.data(),
+				m_destinationBuffer.capacity(),
+				pbase(),
+				orig_size,
+				nullptr
+			);
 
-    void write_footer() {
-      assert(!closed_);
-      size_t ret = LZ4F_compressEnd(ctx_, &dest_buf_.front(), dest_buf_.capacity(), nullptr);
-      if (LZ4F_isError(ret) != 0) {
-        throw std::runtime_error(std::string("Failed to end LZ4 compression: ")
-                                 + LZ4F_getErrorName(ret));
-      }
-      sink_.write(&dest_buf_.front(), ret);
-    }
+			if (LZ4F_isError(result) not_eq 0) {
+				std::string error;
+				error += "LZ4 compression failed: ";
+				error += LZ4F_getErrorName(result);
+				throw std::runtime_error{error};
+			}
 
-    std::ostream& sink_;
-    std::array<char, SrcBufSize> src_buf_;
-    std::vector<char> dest_buf_;
-    LZ4F_compressionContext_t ctx_;
-    bool closed_;
-  };
+			m_sink.write(m_destinationBuffer.data(), result);
+		}
 
-  output_buffer* buffer_;
+		void WriteHeader()
+		{
+			// TODO: Throw exception instead or set badbit
+			assert(!m_closed);
+			std::size_t const result = LZ4F_compressBegin(
+				m_context,
+				m_destinationBuffer.data(),
+				m_destinationBuffer.capacity(),
+				nullptr
+			);
+
+			if (LZ4F_isError(result) not_eq 0) {
+				std::string error;
+				error += "Failed to start LZ4 compression: ";
+				error += LZ4F_getErrorName(result);
+				throw std::runtime_error{error};
+			}
+			m_sink.write(m_destinationBuffer.data(), result);
+		}
+
+		void WriteFooter()
+		{
+			assert(!m_closed);
+			std::size_t const result = LZ4F_compressEnd(
+				m_context,
+				m_destinationBuffer.data(),
+				m_destinationBuffer.capacity(),
+				nullptr
+			);
+			if (LZ4F_isError(result) not_eq 0) {
+				std::string error;
+				error += "Failed to end LZ4 compression: ";
+				error += LZ4F_getErrorName(result);
+				throw std::runtime_error{error};
+			}
+			m_sink.write(m_destinationBuffer.data(), result);
+		}
+
+		std::ostream &m_sink;
+		std::array<char, SrcBufSize> m_sourceBuffer;
+		std::vector<char> m_destinationBuffer;
+		LZ4F_compressionContext_t m_context;
+		bool m_closed;
+	};
+
+	output_buffer *m_buffer;
 };
 
-/**
- * @brief An input stream that will LZ4 decompress output data.
- *
- * An input stream that will wrap another input stream and LZ4
- * decompress its output data to that stream.
- *
- */
-template <size_t SrcBufSize = 256, size_t DestBufSize = 256>
-class basic_istream : public std::istream
+template<size_t SrcBufSize = 256, size_t DestBufSize = 256>
+class basic_istream: public std::istream
 {
- public:
-  /**
-   * @brief Constructs an LZ4 decompression input stream
-   *
-   * @param source The stream to read LZ4 compressed data from
-   */
-  basic_istream(std::istream& source)
-    : std::istream(new input_buffer(source)),
-      buffer_(dynamic_cast<input_buffer*>(rdbuf())) {
-    assert(buffer_);
-  }
+public:
+	explicit basic_istream(std::istream &iSource)
+		: std::istream{new input_buffer(iSource)}
+		, m_buffer{static_cast<input_buffer *>(rdbuf())}
+	{
+		assert(m_buffer);
+	}
 
-  /**
-   * @brief Destroys the LZ4 output stream.
-   */
-  ~basic_istream() {
-    delete buffer_;
-  }
+	~basic_istream() final
+	{
+		delete m_buffer;
+	}
 
- private:
-  class input_buffer : public std::streambuf {
-  public:
-    input_buffer(std::istream &source)
-      : source_(source),
-        offset_(0),
-        src_buf_size_(0),
-        ctx_(nullptr) {
-      size_t ret = LZ4F_createDecompressionContext(&ctx_, LZ4F_VERSION);
-      if (LZ4F_isError(ret) != 0) {
-        throw std::runtime_error(std::string("Failed to create LZ4 decompression context: ")
-                                 + LZ4F_getErrorName(ret));
-      }
-      setg(&src_buf_.front(), &src_buf_.front(), &src_buf_.front());
-    }
+private:
+	class input_buffer: public std::streambuf
+	{
+	public:
+		input_buffer(std::istream & iSource)
+			: m_source{iSource}
+			, m_offset{0}
+			, m_sourceBufferSize{0}
+			, m_context{nullptr}
+		{
+			std::size_t const result = LZ4F_createDecompressionContext(&m_context, LZ4F_VERSION);
+			if (LZ4F_isError(result) not_eq 0) {
+				std::string error;
+				error += "Failed to create LZ4 decompression context: ";
+				error += LZ4F_getErrorName(result);
+				throw std::runtime_error{error};
+			}
+			setg(sourceBuffer.data(), sourceBuffer.data(), sourceBuffer.data());
+		}
 
-    ~input_buffer() {
-      LZ4F_freeDecompressionContext(ctx_);
-    }
+		~input_buffer() final
+		{
+			LZ4F_freeDecompressionContext(m_context);
+		}
 
-    int_type underflow() override {
-      size_t written_size = 0;
-      while (written_size == 0) {
-        if (offset_ == src_buf_size_) {
-          source_.read(&src_buf_.front(), src_buf_.size());
-          src_buf_size_ = static_cast<size_t>(source_.gcount());
-          offset_ = 0;
-        }
+		int_type underflow() final
+		{
+			std::size_t writtenSize = 0;
+			while (writtenSize == 0) {
+				if (m_offset == m_sourceBufferSize) {
+					m_source.read(sourceBuffer.data(), sourceBuffer.size());
+					m_sourceBufferSize = static_cast<std::size_t>(m_source.gcount());
+					m_offset = 0;
+				}
 
-        if (src_buf_size_ == 0) {
-          return traits_type::eof();
-        }
+				if (m_sourceBufferSize == 0) {
+					return traits_type::eof();
+				}
 
-        size_t src_size = src_buf_size_ - offset_;
-        size_t dest_size = dest_buf_.size();
-        size_t ret = LZ4F_decompress(ctx_, &dest_buf_.front(), &dest_size,
-                                     &src_buf_.front() + offset_, &src_size, nullptr);
-        if (LZ4F_isError(ret) != 0) {
-          throw std::runtime_error(std::string("LZ4 decompression failed: ")
-                                   + LZ4F_getErrorName(ret));
-        }
-        written_size = dest_size;
-        offset_ += src_size;
-      }
-      setg(&dest_buf_.front(), &dest_buf_.front(), &dest_buf_.front() + written_size);
-      return traits_type::to_int_type(*gptr());
-    }
+				std::size_t const src_size = m_sourceBufferSize - m_offset;
+				std::size_t const dest_size = destinationBuffer.size();
+				std::size_t const result = LZ4F_decompress(
+					m_context,
+					destinationBuffer.data(),
+					&dest_size,
+					sourceBuffer.data() + m_offset,
+					&src_size,
+					nullptr
+				);
 
-    input_buffer(const input_buffer&) = delete;
-    input_buffer& operator= (const input_buffer&) = delete;
-  private:
-    std::istream& source_;
-    std::array<char, SrcBufSize> src_buf_;
-    std::array<char, DestBufSize> dest_buf_;
-    size_t offset_;
-    size_t src_buf_size_;
-    LZ4F_decompressionContext_t ctx_;
-  };
+				if (LZ4F_isError(result) != 0) {
+					std::string error;
+					error += "LZ4 decompression failed: ";
+					error += LZ4F_getErrorName(result);
+					throw std::runtime_error{error};
+				}
+				writtenSize = dest_size;
+				m_offset += src_size;
+			}
 
-  input_buffer* buffer_;
+			setg(destinationBuffer.data(), destinationBuffer.data(), destinationBuffer.data() + writtenSize);
+			return traits_type::to_int_type(*gptr());
+		}
+
+		input_buffer(const input_buffer &) = delete;
+		input_buffer &operator=(const input_buffer &) = delete;
+
+	private:
+		std::istream &m_source;
+		std::array<char, SrcBufSize> sourceBuffer;
+		std::array<char, DestBufSize> destinationBuffer;
+		size_t m_offset;
+		size_t m_sourceBufferSize;
+		LZ4F_decompressionContext_t m_context;
+	};
+
+	input_buffer *m_buffer;
 };
 
 using ostream = basic_ostream<>;
 using istream = basic_istream<>;
 
 }
-#endif // LZ4_STREAM
