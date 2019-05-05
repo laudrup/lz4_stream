@@ -12,23 +12,28 @@
 #include <streambuf>
 #include <vector>
 
+namespace metrics
+{
+	std::size_t constexpr BYTE = 8;
+	std::size_t constexpr KBYTE = BYTE * 1024;
+	std::size_t constexpr MEGABYTE = KBYTE * 1024;
+}
+
 namespace lz4_stream
 {
-template<size_t SrcBufSize = 256>
+template<std::size_t SrcBufSize = 16 * metrics::MEGABYTE>
 class basic_ostream: public std::ostream
 {
 public:
 	explicit basic_ostream(std::ostream &ioSink)
 		: std::ostream{new output_buffer{ioSink}}
-		, m_buffer(reinterpret_cast<output_buffer *>(rdbuf()))
-	{
-		assert(m_buffer);
-	}
+		, m_buffer{reinterpret_cast<output_buffer *>(rdbuf())}
+	{}
 
 	~basic_ostream() final
 	{
 		this->Close();
-		delete[] m_buffer;
+		delete m_buffer;
 	}
 
 	void Close()
@@ -40,17 +45,18 @@ private:
 	class output_buffer: public std::streambuf
 	{
 	public:
-		output_buffer(const output_buffer &) = delete;
-		output_buffer &operator=(const output_buffer &) = delete;
+		output_buffer(output_buffer const & iOther) = delete;
+		output_buffer & operator=(output_buffer const & iOther) = delete;
 
-		explicit output_buffer(std::ostream &sink)
-			: m_sink{sink}
-			// TODO: No need to recalculate the m_destinationBuffer size on each construction
-			, m_destinationBuffer{LZ4F_compressBound(m_sourceBuffer.size(), nullptr)}
+		explicit output_buffer(std::ostream &ioSink)
+			: m_sink{ioSink}
 			, m_context{nullptr}
 			, m_closed{false}
 		{
-			char const *const base = m_sourceBuffer.data();
+			std::size_t && destinationBufferSize = LZ4F_compressBound(SrcBufSize, nullptr);
+			m_destinationBuffer.resize(destinationBufferSize);
+
+			char * base = m_sourceBuffer.data();
 			setp(base, base + m_sourceBuffer.size() - 1);
 
 			std::size_t const result = LZ4F_createCompressionContext(&m_context, LZ4F_VERSION);
@@ -82,8 +88,6 @@ private:
 	private:
 		int_type overflow(int_type iCharacter) final
 		{
-			assert(std::less_equal<char *>()(pptr(), epptr()));
-
 			*pptr() = static_cast<basic_ostream::char_type>(iCharacter);
 			pbump(1);
 			this->CompressAndWrite();
@@ -99,8 +103,6 @@ private:
 
 		void CompressAndWrite()
 		{
-			// TODO: Throw exception instead or set badbit
-			assert(!m_closed);
 			auto const orig_size = static_cast<std::int32_t>(pptr() - pbase());
 			pbump(-orig_size);
 			std::size_t const result = LZ4F_compressUpdate(
@@ -124,8 +126,6 @@ private:
 
 		void WriteHeader()
 		{
-			// TODO: Throw exception instead or set badbit
-			assert(!m_closed);
 			std::size_t const result = LZ4F_compressBegin(
 				m_context,
 				m_destinationBuffer.data(),
@@ -160,26 +160,24 @@ private:
 			m_sink.write(m_destinationBuffer.data(), result);
 		}
 
-		std::ostream &m_sink;
+		std::ostream & m_sink;
 		std::array<char, SrcBufSize> m_sourceBuffer;
 		std::vector<char> m_destinationBuffer;
 		LZ4F_compressionContext_t m_context;
 		bool m_closed;
 	};
 
-	output_buffer *m_buffer;
+	output_buffer * m_buffer;
 };
 
-template<size_t SrcBufSize = 256, size_t DestBufSize = 256>
+template<std::size_t SrcBufSize = 16 * metrics::MEGABYTE, std::size_t DestBufSize = 16 * metrics::MEGABYTE>
 class basic_istream: public std::istream
 {
 public:
 	explicit basic_istream(std::istream &iSource)
 		: std::istream{new input_buffer(iSource)}
 		, m_buffer{static_cast<input_buffer *>(rdbuf())}
-	{
-		assert(m_buffer);
-	}
+	{}
 
 	~basic_istream() final
 	{
@@ -190,7 +188,10 @@ private:
 	class input_buffer: public std::streambuf
 	{
 	public:
-		input_buffer(std::istream & iSource)
+		input_buffer(input_buffer const & iOther) = delete;
+		input_buffer & operator=(input_buffer const & iOther) = delete;
+
+		explicit input_buffer(std::istream & iSource)
 			: m_source{iSource}
 			, m_offset{0}
 			, m_sourceBufferSize{0}
@@ -225,8 +226,8 @@ private:
 					return traits_type::eof();
 				}
 
-				std::size_t const src_size = m_sourceBufferSize - m_offset;
-				std::size_t const dest_size = destinationBuffer.size();
+				std::size_t src_size = m_sourceBufferSize - m_offset;
+				std::size_t dest_size = destinationBuffer.size();
 				std::size_t const result = LZ4F_decompress(
 					m_context,
 					destinationBuffer.data(),
@@ -250,19 +251,16 @@ private:
 			return traits_type::to_int_type(*gptr());
 		}
 
-		input_buffer(const input_buffer &) = delete;
-		input_buffer &operator=(const input_buffer &) = delete;
-
 	private:
-		std::istream &m_source;
+		std::istream & m_source;
 		std::array<char, SrcBufSize> sourceBuffer;
 		std::array<char, DestBufSize> destinationBuffer;
-		size_t m_offset;
-		size_t m_sourceBufferSize;
+		std::size_t m_offset;
+		std::size_t m_sourceBufferSize;
 		LZ4F_decompressionContext_t m_context;
 	};
 
-	input_buffer *m_buffer;
+	input_buffer * m_buffer;
 };
 
 using ostream = basic_ostream<>;

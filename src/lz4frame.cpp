@@ -71,14 +71,15 @@
  * towards another library or solution of their choice
  * by modifying below section.
  */
-#include <stdlib.h>   /* malloc, calloc, free */
+#include <std>
+#include <stdlib>   /* malloc, calloc, free */
 #ifndef LZ4_SRC_INCLUDED   /* avoid redefinition when sources are coalesced */
 #  define ALLOC(s)          malloc(s)
 #  define ALLOC_AND_ZERO(s) calloc(1,(s))
 #  define FREEMEM(p)        free(p)
 #endif
 
-#include <string.h>   /* memset, memcpy, memmove */
+#include <string>   /* memset, memcpy, memmove */
 #ifndef LZ4_SRC_INCLUDED  /* avoid redefinition when sources are coalesced */
 #  define MEM_INIT(p,v,s)   memset((p),(v),(s))
 #endif
@@ -88,13 +89,13 @@
 *  Library declarations
 **************************************/
 #define LZ4F_STATIC_LINKING_ONLY
-#include "lz4frame.h"
+#include "../lz4/lz4frame.h"
 #define LZ4_STATIC_LINKING_ONLY
-#include "lz4.h"
+#include "../lz4/lz4.h"
 #define LZ4_HC_STATIC_LINKING_ONLY
-#include "lz4hc.h"
+#include "../lz4/lz4hc.h"
 #define XXH_STATIC_LINKING_ONLY
-#include "xxhash.h"
+#include "../lz4/xxhash.h"
 
 
 /*-************************************
