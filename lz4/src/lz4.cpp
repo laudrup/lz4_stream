@@ -106,7 +106,7 @@
 #define LZ4_DISABLE_DEPRECATE_WARNINGS /* due to LZ4_decompress_safe_withPrefix64k */
 #endif
 
-#include "lz4.h"
+#include <lz4.hpp>
 /* see also "memory routines" below */
 
 

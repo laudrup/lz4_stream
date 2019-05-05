@@ -71,8 +71,7 @@
  * towards another library or solution of their choice
  * by modifying below section.
  */
-#include <std>
-#include <stdlib>   /* malloc, calloc, free */
+#include <stdlib.h>   /* malloc, calloc, free */
 #ifndef LZ4_SRC_INCLUDED   /* avoid redefinition when sources are coalesced */
 #  define ALLOC(s)          malloc(s)
 #  define ALLOC_AND_ZERO(s) calloc(1,(s))
@@ -89,13 +88,13 @@
 *  Library declarations
 **************************************/
 #define LZ4F_STATIC_LINKING_ONLY
-#include "../lz4/lz4frame.h"
+#include <lz4frame.hpp>
 #define LZ4_STATIC_LINKING_ONLY
-#include "../lz4/lz4.h"
+#include <lz4.hpp>
 #define LZ4_HC_STATIC_LINKING_ONLY
-#include "../lz4/lz4hc.h"
+#include <lz4hc.hpp>
 #define XXH_STATIC_LINKING_ONLY
-#include "../lz4/xxhash.h"
+#include <xxhash.hpp>
 
 
 /*-************************************
@@ -130,7 +129,9 @@ static int g_debuglog_enable = 1;
 **************************************/
 #if !defined (__VMS) && (defined (__cplusplus) || (defined (__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) /* C99 */) )
 # include <stdint.h>
-  typedef  uint8_t BYTE;
+#include <cstring>
+
+typedef  uint8_t BYTE;
   typedef uint16_t U16;
   typedef uint32_t U32;
   typedef  int32_t S32;
