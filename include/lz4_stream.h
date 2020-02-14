@@ -134,9 +134,14 @@ class basic_ostream : public std::ostream
       return 0;
     }
 
+    void throw_if_closed() {
+      if (closed_) {
+        throw std::runtime_error(std::string("lz4_stream::basic_ostream used after close"));
+      }
+    }
+
     void compress_and_write() {
-      // TODO: Throw exception instead or set badbit
-      assert(!closed_);
+      throw_if_closed();
       int orig_size = static_cast<int>(pptr() - pbase());
       pbump(-orig_size);
       size_t ret = LZ4F_compressUpdate(context_.ctx, &dest_buf_.front(), dest_buf_.capacity(),
@@ -149,8 +154,7 @@ class basic_ostream : public std::ostream
     }
 
     void write_header() {
-      // TODO: Throw exception instead or set badbit
-      assert(!closed_);
+      throw_if_closed();
       size_t ret = LZ4F_compressBegin(context_.ctx, &dest_buf_.front(), dest_buf_.capacity(), nullptr);
       if (LZ4F_isError(ret) != 0) {
         throw std::runtime_error(std::string("Failed to start LZ4 compression: ")
@@ -160,7 +164,7 @@ class basic_ostream : public std::ostream
     }
 
     void write_footer() {
-      assert(!closed_);
+      throw_if_closed();
       size_t ret = LZ4F_compressEnd(context_.ctx, &dest_buf_.front(), dest_buf_.capacity(), nullptr);
       if (LZ4F_isError(ret) != 0) {
         throw std::runtime_error(std::string("Failed to end LZ4 compression: ")
