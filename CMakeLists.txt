@@ -62,3 +62,6 @@ target_link_libraries(lz4_compress ${LZ4_STREAM_LIBRARY_NAME})
 
 add_executable(lz4_decompress lz4_decompress.cpp)
 target_link_libraries(lz4_decompress ${LZ4_STREAM_LIBRARY_NAME})
+
+add_executable(lz4_dropin lz4_dropin.cpp)
+target_link_libraries(lz4_dropin ${LZ4_STREAM_LIBRARY_NAME})
