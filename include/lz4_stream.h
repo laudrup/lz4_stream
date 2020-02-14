@@ -20,6 +20,19 @@ namespace lz4_stream {
  * An output stream that will wrap another output stream and LZ4
  * compress its input data to that stream.
  *
+ * It will enable exceptions on the output stream using
+ *
+ * @code{.cpp}
+ * sink.exceptions(std::ostream::badbit);
+ * @endcode
+ *
+ * to ensure that write errors do not go unnoticed.
+ *
+ * Once an exception has been raised, you are not allowed to use
+ * the stream further (this is not checked), because the library
+ * currently does not ensure to maintain a correct internal LZ4
+ * state when it happens.
+ *
  */
 template <size_t SrcBufSize = 256>
 class basic_ostream : public std::ostream
@@ -86,6 +99,8 @@ class basic_ostream : public std::ostream
         closed_(false) {
       char* base = &src_buf_.front();
       setp(base, base + src_buf_.size() - 1);
+
+      sink.exceptions(std::ostream::badbit);
 
       write_header();
     }
@@ -170,6 +185,18 @@ class basic_ostream : public std::ostream
  * An input stream that will wrap another input stream and LZ4
  * decompress its output data to that stream.
  *
+ * It will enable exceptions on the input stream using
+ *
+ * @code{.cpp}
+ * source.exceptions(std::istream::badbit);
+ * @endcode
+ *
+ * to ensure that read errors do not go unnoticed.
+ *
+ * Once an exception has been raised, you are not allowed to use
+ * the stream further (this is not checked), because the library
+ * currently does not ensure to maintain a correct internal LZ4
+ * state when it happens.
  */
 template <size_t SrcBufSize = 256, size_t DestBufSize = 256>
 class basic_istream : public std::istream
@@ -221,6 +248,8 @@ class basic_istream : public std::istream
         offset_(0),
         src_buf_size_(0) {
       setg(&src_buf_.front(), &src_buf_.front(), &src_buf_.front());
+
+      source.exceptions(std::istream::badbit);
     }
 
     int_type underflow() override {
