@@ -86,6 +86,7 @@ class basic_ostream : public std::ostream
       }
       sync();
       write_footer();
+      assert(ctx_ != nullptr);
       LZ4F_freeCompressionContext(ctx_);
       closed_ = true;
     }
