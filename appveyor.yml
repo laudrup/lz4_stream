@@ -2,16 +2,6 @@ version: '{build}'
 
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      platform: x86
-      GENERATOR: Visual Studio 14 2015
-      CONFIG: Release
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      platform: x86
-      GENERATOR: Visual Studio 14 2015
-      CONFIG: Debug
-
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       platform: x86
       GENERATOR: Visual Studio 15 2017
@@ -22,24 +12,24 @@ environment:
       GENERATOR: Visual Studio 15 2017
       CONFIG: Debug
 
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       platform: x64
-      GENERATOR: Visual Studio 14 2015 Win64
+      GENERATOR: Visual Studio 15 2017 Win64
       CONFIG: Release
 
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       platform: x64
-      GENERATOR: Visual Studio 14 2015 Win64
+      GENERATOR: Visual Studio 15 2017 Win64
       CONFIG: Debug
 
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       platform: x64
-      GENERATOR: Visual Studio 15 2017 Win64
+      GENERATOR: Visual Studio 16 2019
       CONFIG: Release
 
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       platform: x64
-      GENERATOR: Visual Studio 15 2017 Win64
+      GENERATOR: Visual Studio 16 2019
       CONFIG: Debug
 
 before_build:
