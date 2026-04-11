@@ -1,6 +1,9 @@
 lz4_stream - A C++ stream using LZ4 (de)compression
 ===================================================
 
+>[!IMPORTANT]
+>Moved to [Codeberg](https://codeberg.org/laudrup/lz4_stream) to avoid the effects of Github enshitification by Microsoft.
+
 lz4_stream is a simple wrapper that uses C++ streams for compressing and decompressing data using the [LZ4 compression library]
 
 Usage
